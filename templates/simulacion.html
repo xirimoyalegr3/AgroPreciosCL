@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Simulación - AgroPrecios{% endblock %}
+
+{% block content %}
+<div class="floating-box" style="top: 100px; left: 50px; width: 500px; height: 400px;">
+    <div class="box-header">
+        <h3>Simulador de Compra y Venta</h3>
+    </div>
+    <p>Simulador en desarrollo</p>
+    <div style="margin-top: 1rem;">
+        <label>Producto:</label>
+        <select style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;">
+            <option>Acelga</option>
+            <option>Ají</option>
+            <option>Ajo</option>
+        </select>
+        
+        <label>Cantidad:</label>
+        <input type="number" style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;">
+        
+        <label>Región:</label>
+        <select style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;">
+            <option>Región Metropolitana</option>
+        </select>
+        
+        <button style="width: 100%; padding: 0.5rem; background: #2c5530; color: white; border: none; border-radius: 4px;">
+            Calcular Simulación
+        </button>
+    </div>
+</div>
+
+<div class="floating-box" style="top: 100px; right: 50px; width: 400px; height: 300px;">
+    <div class="box-header">
+        <h3>Resultados de Simulación</h3>
+    </div>
+    <p>Los resultados aparecerán aquí después de ejecutar la simulación.</p>
+</div>
+{% endblock %}

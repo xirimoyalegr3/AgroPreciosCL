@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Mapa Interactivo - AgroPrecios{% endblock %}
+
+{% block content %}
+<div class="floating-box" style="top: 100px; left: 50px; width: 700px; height: 500px;">
+    <div class="box-header">
+        <h3>Mapa Interactivo de Chile</h3>
+    </div>
+    <p>Visualización de precios por región (en desarrollo)</p>
+    <div id="mapa-chile" style="width: 100%; height: 400px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+        <p>Mapa de Chile interactivo se implementará aquí</p>
+    </div>
+</div>
+
+<div class="floating-box" style="top: 100px; right: 50px; width: 300px; height: 400px;">
+    <div class="box-header">
+        <h3>Filtros</h3>
+    </div>
+    <p>Filtros para el mapa (en desarrollo)</p>
+    <div style="margin-top: 1rem;">
+        <label>Producto:</label>
+        <select style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;">
+            <option>Todos los productos</option>
+            <option>Acelga</option>
+            <option>Ají</option>
+            <option>Ajo</option>
+        </select>
+        
+        <label>Fecha:</label>
+        <input type="date" style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;">
+        
+        <button style="width: 100%; padding: 0.5rem; background: #2c5530; color: white; border: none; border-radius: 4px;">
+            Aplicar Filtros
+        </button>
+    </div>
+</div>
+{% endblock %}
