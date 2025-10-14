@@ -9,4 +9,5 @@ urlpatterns = [
     path('analisis/', views.analisis_view, name='analisis'),
     path('mapa/', views.mapa_interactivo, name='mapa'),
     path('datos/', include('datos.urls')),  # ¡Descomentar esta línea!
+
 ]

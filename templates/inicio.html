@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio - AgroPrecios{% endblock %}
 
 {% block content %}
-<div class="floating-box" style="top: 100px; left: 50px; width: 400px; height: 300px;">
+<link rel="stylesheet" href="{% static 'css/inicio.css' %}">
+<script src="{% static 'js/inicio.js' %}"></script>
+
+<div class="floating-box bienvenida-box">
     <div class="box-header">
         <h3>Bienvenido a AgroPrecios</h3>
     </div>
@@ -16,7 +22,7 @@
     </div>
 </div>
 
-<div class="floating-box" style="top: 100px; right: 50px; width: 500px; height: 400px;">
+<div class="floating-box resumen-box">
     <div class="box-header">
         <h3>Resumen de Datos</h3>
     </div>
@@ -27,11 +33,11 @@
         <li>Ají</li>
         <li>Ajo</li>
     </ul>
-    <p><strong>Mercados:</strong> Vega Central Mapocho, Lo Valledor, Vega poniente</p>
+    <p><strong>Mercados:</strong> Vega Central Mapocho, Lo Valledor, Vega Poniente</p>
     <p><strong>Región:</strong> Región Metropolitana de Santiago</p>
 </div>
 
-<div class="floating-box" style="bottom: 50px; left: 50px; width: 600px; height: 300px;">
+<div class="floating-box funcionalidades-box">
     <div class="box-header">
         <h3>Próximas Funcionalidades</h3>
     </div>
@@ -45,20 +51,14 @@
     </ul>
 </div>
 
-<div class="floating-box" style="bottom: 50px; right: 50px; width: 400px; height: 250px;">
+<div class="floating-box acciones-box">
     <div class="box-header">
         <h3>Acciones Rápidas</h3>
     </div>
-    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <a href="/admin/" style="padding: 0.5rem; background: #2c5530; color: white; text-decoration: none; border-radius: 4px; text-align: center;">
-            Panel de Administración
-        </a>
-        <a href="{% url 'mapa' %}" style="padding: 0.5rem; background: #4a7c59; color: white; text-decoration: none; border-radius: 4px; text-align: center;">
-            Ver Mapa Interactivo
-        </a>
-        <a href="{% url 'simulacion' %}" style="padding: 0.5rem; background: #6ba36b; color: white; text-decoration: none; border-radius: 4px; text-align: center;">
-            Ir a Simulador
-        </a>
+    <div class="acciones">
+        <a href="/admin/" class="btn-admin">Panel de Administración</a>
+        <a href="{% url 'mapa' %}" class="btn-mapa">Ver Mapa Interactivo</a>
+        <a href="{% url 'simulacion' %}" class="btn-simulador">Ir a Simulador</a>
     </div>
 </div>
 {% endblock %}

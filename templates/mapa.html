@@ -1,38 +1,149 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Mapa Interactivo - AgroPrecios{% endblock %}
 
 {% block content %}
-<div class="floating-box" style="top: 100px; left: 50px; width: 700px; height: 500px;">
+<link rel="stylesheet" href="{% static 'css/mapa.css' %}">
+
+<!-- Mapa de Chile -->
+
+
+<div class="floating-box mapa-box">
+    <div class="drag-handle">⤡</div>
     <div class="box-header">
         <h3>Mapa Interactivo de Chile</h3>
     </div>
-    <p>Visualización de precios por región (en desarrollo)</p>
-    <div id="mapa-chile" style="width: 100%; height: 400px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-        <p>Mapa de Chile interactivo se implementará aquí</p>
-    </div>
+    <img id="map" src="https://commons.wikimedia.org/wiki/Special:FilePath/Mapa_de_Chile.svg" alt="Mapa de Chile">
 </div>
 
-<div class="floating-box" style="top: 100px; right: 50px; width: 300px; height: 400px;">
+<!-- Filtros -->
+<div class="floating-box filtros-box">
+    <div class="drag-handle">⤡</div>
     <div class="box-header">
         <h3>Filtros</h3>
     </div>
-    <p>Filtros para el mapa (en desarrollo)</p>
-    <div style="margin-top: 1rem;">
-        <label>Producto:</label>
-        <select style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;">
-            <option>Todos los productos</option>
-            <option>Acelga</option>
-            <option>Ají</option>
-            <option>Ajo</option>
+    <form method="GET">
+        <label>Fecha:</label>
+        <input type="date" name="fecha" value="{{ request.GET.fecha|default:'' }}">
+        
+        <label>Región:</label>
+        <select name="region">
+            <option value="">Todas</option>
+            {% for reg in regiones %}
+                <option value="{{ reg.id }}" {% if request.GET.region == reg.id|stringformat:"s" %}selected{% endif %}>{{ reg.nombre }}</option>
+            {% endfor %}
         </select>
         
-        <label>Fecha:</label>
-        <input type="date" style="width: 100%; padding: 0.5rem; margin-bottom: 1rem;">
+        <label>Mercado:</label>
+        <select name="mercado">
+            <option value="">Todos</option>
+            {% for m in mercados %}
+                <option value="{{ m.id }}" {% if request.GET.mercado == m.id|stringformat:"s" %}selected{% endif %}>{{ m.nombre }}</option>
+            {% endfor %}
+        </select>
         
-        <button style="width: 100%; padding: 0.5rem; background: #2c5530; color: white; border: none; border-radius: 4px;">
-            Aplicar Filtros
-        </button>
+        <label>Producto:</label>
+        <select name="producto">
+            <option value="">Todos</option>
+            {% for p in productos %}
+                <option value="{{ p.id }}" {% if request.GET.producto == p.id|stringformat:"s" %}selected{% endif %}>{{ p.nombre }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn-filtros">Aplicar Filtros</button>
+    </form>
+</div>
+
+<!-- KPIs -->
+<div class="floating-box kpi-box">
+    <div class="drag-handle">⤡</div>
+    <div class="kpi"><h3>Mayor variación</h3>
+        <p>{{ mayor_variacion.producto.nombre }} (+{{ mayor_variacion.precio_promedio }})</p>
+    </div>
+    <div class="kpi"><h3>Región más cara</h3>
+        <p>{{ region_mas_cara.region__nombre }}</p>
+    </div>
+    <div class="kpi"><h3>Mercado top</h3>
+        <p>{{ mercado_top.mercado__nombre }}</p>
     </div>
 </div>
+
+<!-- Tabla resultados -->
+<div class="floating-box tabla-box">
+    <div class="drag-handle">⤡</div>
+    <h3>Resultados</h3>
+    <table>
+        <thead>
+            <tr><th>Producto</th><th>Variedad</th><th>Calidad</th><th>Volumen</th><th>Min</th><th>Max</th><th>Promedio</th></tr>
+        </thead>
+        <tbody>
+            {% for dato in resultados %}
+            <tr>
+                <td>{{ dato.producto.nombre }}</td>
+                <td>{{ dato.producto.variedad_tipo }}</td>
+                <td>{{ dato.producto.calidad }}</td>
+                <td>{{ dato.volumen }}</td>
+                <td>${{ dato.precio_minimo }}</td>
+                <td>${{ dato.precio_maximo }}</td>
+                <td>${{ dato.precio_promedio }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Gráfico -->
+<div class="floating-box chart-box">
+    <div class="drag-handle">⤡</div>
+    <canvas id="chart"></canvas>
+</div>
+
+<!-- Datos de la base de datos 
+<div class="floating-box datos-box">
+    <div class="drag-handle">⤡</div>
+    <div class="box-header">
+        <h3>Datos de la Base de Datos</h3>
+    </div>
+    <table class="tabla-datos">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Región</th>
+                <th>Mercado</th>
+                <th>Producto</th>
+                <th>Variedad</th>
+                <th>Calidad</th>
+                <th>Volumen</th>
+                <th>Precio Mínimo</th>
+                <th>Precio Máximo</th>
+                <th>Precio Promedio</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dato in datos_bd %}
+            <tr>
+                <td>{{ dato.fecha }}</td>
+                <td>{{ dato.region.nombre }}</td>
+                <td>{{ dato.mercado.nombre }}</td>
+                <td>{{ dato.producto.nombre }}</td>
+                <td>{{ dato.producto.variedad_tipo }}</td>
+                <td>{{ dato.producto.calidad }}</td>
+                <td>{{ dato.volumen }}</td>
+                <td>${{ dato.precio_minimo }}</td>
+                <td>${{ dato.precio_maximo }}</td>
+                <td>${{ dato.precio_promedio }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="sin-datos">No hay datos disponibles.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+-->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/mapa.js' %}"></script>
 {% endblock %}
