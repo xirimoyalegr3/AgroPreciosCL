@@ -1,0 +1,214 @@
+# mapaInteractivo/management/commands/load_csv_data.py
+import pandas as pd
+import os
+import logging
+from django.core.management.base import BaseCommand
+from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
+from mapaInteractivo.models import (DatosComercializacion, Region, Mercado, 
+                                   Subsector, Producto, Variedad, ProgresoCarga)
+
+logger = logging.getLogger(__name__)
+
+class CSVDataLoader:
+    def __init__(self, chunk_size=10000):
+        self.chunk_size = chunk_size
+        self.cache = {}
+    
+    def get_or_create_related(self, model, nombre, **defaults):
+        """Cache para evitar consultas repetidas a la BD"""
+        cache_key = f"{model.__name__}_{nombre}"
+        if cache_key not in self.cache:
+            try:
+                obj, created = model.objects.get_or_create(
+                    nombre=nombre,
+                    defaults=defaults
+                )
+                self.cache[cache_key] = obj
+            except Exception as e:
+                logger.error(f"Error creando {model.__name__}: {nombre} - {e}")
+                raise
+        return self.cache[cache_key]
+    
+    def limpiar_datos(self, df):
+        """Limpieza y transformación de datos"""
+        # Convertir comas a puntos en números
+        numeric_columns = ['Volumen', 'Precio minimo', 'Precio maximo', 'Precio promedio']
+        for col in numeric_columns:
+            if col in df.columns:
+                df[col] = pd.to_numeric(
+                    df[col].astype(str).str.replace(',', '.'), 
+                    errors='coerce'
+                )
+        
+        # Manejar valores nulos
+        df = df.dropna(subset=['Fecha', 'ID region', 'Producto'])
+        
+        return df
+    
+    def procesar_chunk(self, chunk, progreso):
+        """Procesa un chunk de datos"""
+        try:
+            chunk = self.limpiar_datos(chunk)
+            datos_a_guardar = []
+            
+            for _, row in chunk.iterrows():
+                try:
+                    # Obtener o crear objetos relacionados
+                    region = self.get_or_create_related(
+                        Region, 
+                        row['Region'],
+                        id_region=int(row['ID region'])
+                    )
+                    
+                    mercado = self.get_or_create_related(Mercado, row['Mercado'])
+                    subsector = self.get_or_create_related(Subsector, row['Subsector'])
+                    producto = self.get_or_create_related(
+                        Producto, 
+                        row['Producto'],
+                        subsector=subsector
+                    )
+                    
+                    variedad_nombre = row['Variedad / Tipo'] if pd.notna(row['Variedad / Tipo']) else 'Sin especificar'
+                    variedad = self.get_or_create_related(
+                        Variedad, 
+                        variedad_nombre,
+                        producto=producto
+                    )
+                    
+                    # Crear objeto de datos
+                    dato = DatosComercializacion(
+                        fecha=row['Fecha'],
+                        region=region,
+                        mercado=mercado,
+                        subsector=subsector,
+                        producto=producto,
+                        variedad=variedad,
+                        calidad=row['Calidad'],
+                        unidad_comercializacion=row['Unidad de comercializacion'],
+                        origen=row['Origen'],
+                        volumen=row['Volumen'],
+                        precio_minimo=row['Precio minimo'],
+                        precio_maximo=row['Precio maximo'],
+                        precio_promedio=row['Precio promedio']
+                    )
+                    datos_a_guardar.append(dato)
+                    
+                except Exception as e:
+                    logger.warning(f"Error procesando fila: {e}")
+                    continue
+            
+            # Guardar en lote
+            with transaction.atomic():
+                DatosComercializacion.objects.bulk_create(
+                    datos_a_guardar,
+                    batch_size=1000,
+                    ignore_conflicts=True
+                )
+            
+            # Actualizar progreso
+            progreso.lineas_procesadas += len(chunk)
+            progreso.save()
+            
+            logger.info(f"Procesadas {progreso.lineas_procesadas}/{progreso.total_lineas} líneas")
+            
+        except Exception as e:
+            logger.error(f"Error procesando chunk: {e}")
+            raise
+    
+    def cargar_directorio(self, directorio_path):
+        """Carga todos los CSV de un directorio"""
+        archivos_csv = [f for f in os.listdir(directorio_path) if f.endswith('.csv')]
+        
+        for archivo in archivos_csv:
+            archivo_path = os.path.join(directorio_path, archivo)
+            self.cargar_archivo(archivo_path)
+    
+    def cargar_archivo(self, archivo_path):
+        """Carga un archivo CSV específico con recuperación"""
+        archivo_nombre = os.path.basename(archivo_path)
+        
+        try:
+            # Verificar si ya existe un progreso para este archivo
+            progreso, created = ProgresoCarga.objects.get_or_create(
+                archivo=archivo_nombre,
+                defaults={'total_lineas': self.contar_lineas(archivo_path)}
+            )
+            
+            if progreso.completado:
+                logger.info(f"Archivo {archivo_nombre} ya fue procesado completamente")
+                return
+            
+            # Configurar pandas para lectura por chunks
+            chunk_iterator = pd.read_csv(
+                archivo_path,
+                chunksize=self.chunk_size,
+                dtype={'ID region': 'Int64'},
+                parse_dates=['Fecha'],
+                dayfirst=True
+            )
+            
+            # Saltar chunks ya procesados
+            lineas_a_saltar = progreso.lineas_procesadas
+            if lineas_a_saltar > 0:
+                logger.info(f"Reanudando desde línea {lineas_a_saltar}")
+                # Leer y descartar chunks ya procesados
+                for _ in range(lineas_a_saltar // self.chunk_size):
+                    next(chunk_iterator, None)
+            
+            # Procesar chunks restantes
+            for chunk in chunk_iterator:
+                self.procesar_chunk(chunk, progreso)
+            
+            # Marcar como completado
+            progreso.completado = True
+            progreso.save()
+            logger.info(f"Archivo {archivo_nombre} procesado completamente")
+            
+        except Exception as e:
+            logger.error(f"Error procesando archivo {archivo_nombre}: {e}")
+            raise
+    
+    def contar_lineas(self, archivo_path):
+        """Cuenta las líneas totales del archivo (excluyendo header)"""
+        with open(archivo_path, 'r', encoding='utf-8') as f:
+            return sum(1 for _ in f) - 1  # Restar header
+
+class Command(BaseCommand):
+    help = 'Carga datos CSV al sistema'
+    
+    def add_arguments(self, parser):
+        parser.add_argument('--directorio', type=str, help='Directorio con archivos CSV')
+        parser.add_argument('--archivo', type=str, help='Archivo CSV específico')
+        parser.add_argument('--chunk-size', type=int, default=10000, help='Tamaño del chunk')
+    
+    def handle(self, *args, **options):
+        loader = CSVDataLoader(chunk_size=options['chunk_size'])
+        
+        if options['directorio']:
+            if os.path.exists(options['directorio']):
+                self.stdout.write(f"Cargando directorio: {options['directorio']}")
+                loader.cargar_directorio(options['directorio'])
+                self.stdout.write(
+                    self.style.SUCCESS('Carga de directorio completada')
+                )
+            else:
+                self.stdout.write(
+                    self.style.ERROR('Directorio no existe')
+                )
+        
+        elif options['archivo']:
+            if os.path.exists(options['archivo']):
+                self.stdout.write(f"Cargando archivo: {options['archivo']}")
+                loader.cargar_archivo(options['archivo'])
+                self.stdout.write(
+                    self.style.SUCCESS('Carga de archivo completada')
+                )
+            else:
+                self.stdout.write(
+                    self.style.ERROR('Archivo no existe')
+                )
+        else:
+            self.stdout.write(
+                self.style.ERROR('Debe especificar --directorio o --archivo')
+            )
