@@ -327,7 +327,6 @@ async cargarTodosLosProductos() {
     }
 }
 
-// MANTENER estas funciones igual
 aplicarFiltros() {
     this.filtros = {
         subsector: document.getElementById('filtro-subsector').value,
@@ -337,8 +336,11 @@ aplicarFiltros() {
 
     this.mostrarFiltrosActivos();
 
-    if (this.regionSeleccionada) {
+    // VERIFICAR que hay una región seleccionada Y que el elemento existe
+    if (this.regionSeleccionada && document.getElementById('lista-productos')) {
         this.cargarProductosRegion(this.regionSeleccionada);
+    } else if (!this.regionSeleccionada) {
+        this.mostrarMensaje('Selecciona una región en el mapa para aplicar los filtros', 'info');
     }
 }
 
@@ -349,9 +351,11 @@ limpiarFiltros() {
     this.filtros = { subsector: '', producto: '', año: '' };
     this.ocultarFiltrosActivos();
     
-    if (this.regionSeleccionada) {
+    // VERIFICAR que hay una región seleccionada Y que el elemento existe
+    if (this.regionSeleccionada && document.getElementById('lista-productos')) {
         this.cargarProductosRegion(this.regionSeleccionada);
     }
+    // Si no hay región seleccionada, no hacer nada silenciosamente
 }
 
 mostrarFiltrosActivos() {
@@ -505,56 +509,60 @@ ocultarFiltrosActivos() {
         }
     }
 
-    mostrarInfoRegion(data) {
-        const contenedor = document.getElementById('info-region');
-        
-        let subsectoresHTML = '';
-        if (data.subsectores && data.subsectores.length > 0) {
-            subsectoresHTML = data.subsectores.slice(0, 5).map(subsector => {
-                const nombreSubsector = subsector.nombre || 'Sin nombre';
-                return `<span class="badge">${nombreSubsector} (${subsector.total})</span>`;
-            }).join('');
-        }
-
-        contenedor.innerHTML = `
-            <div class="region-header">
-                <h3>${data.region_nombre}</h3>
-                <div class="region-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">${data.total_registros?.toLocaleString('es-CL') || '0'}</span>
-                        <span class="stat-label">registros</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">${data.total_productos || '0'}</span>
-                        <span class="stat-label">productos</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">${data.total_mercados || '0'}</span>
-                        <span class="stat-label">mercados</span>
-                    </div>
-                </div>
-            </div>
-            ${subsectoresHTML ? `
-                <div class="subsectores-section">
-                    <h4>Subsectores principales:</h4>
-                    <div class="subsectores-list">
-                        ${subsectoresHTML}
-                    </div>
-                </div>
-            ` : ''}
-            <div class="botones-region">
-                <button class="btn-agregar-analisis-region" onclick="app.agregarRegionAnalisis(${data.region_id}, '${data.region_nombre}')">
-                    Agregar a Analisis
-                </button>
-            </div>
-            <div class="productos-section">
-                <h4>Productos disponibles:</h4>
-                <div id="lista-productos" class="productos-list">
-                    <p>Cargando productos...</p>
-                </div>
-            </div>
-        `;
+mostrarInfoRegion(data) {
+    const contenedor = document.getElementById('info-region');
+    
+    let subsectoresHTML = '';
+    if (data.subsectores && data.subsectores.length > 0) {
+        subsectoresHTML = data.subsectores.slice(0, 5).map(subsector => {
+            const nombreSubsector = subsector.nombre || 'Sin nombre';
+            return `<span class="badge">${nombreSubsector} (${subsector.total})</span>`;
+        }).join('');
     }
+
+    // ASEGURAR que el contenedor #lista-productos se crea aquí
+    contenedor.innerHTML = `
+        <div class="region-header">
+            <h3>${data.region_nombre}</h3>
+            <div class="region-stats">
+                <div class="stat-item">
+                    <span class="stat-number">${data.total_registros?.toLocaleString('es-CL') || '0'}</span>
+                    <span class="stat-label">registros</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${data.total_productos || '0'}</span>
+                    <span class="stat-label">productos</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${data.total_mercados || '0'}</span>
+                    <span class="stat-label">mercados</span>
+                </div>
+            </div>
+        </div>
+        ${subsectoresHTML ? `
+            <div class="subsectores-section">
+                <h4>Subsectores principales:</h4>
+                <div class="subsectores-list">
+                    ${subsectoresHTML}
+                </div>
+            </div>
+        ` : ''}
+        <div class="botones-region">
+            <button class="btn-agregar-analisis-region" onclick="app.agregarRegionAnalisis(${data.region_id}, '${data.region_nombre}')">
+                Agregar a Analisis
+            </button>
+        </div>
+        <div class="productos-section">
+            <h4>Productos disponibles:</h4>
+            <div id="lista-productos" class="productos-list">
+                <p>Cargando productos...</p>
+            </div>
+        </div>
+    `;
+    
+    // Cargar los productos inmediatamente después de crear el contenedor
+    this.cargarProductosRegion(data.region_id);
+}
 
     agregarRegionAnalisis(regionId, regionNombre) {
         try {
@@ -777,89 +785,102 @@ generarMetricasComparacion(regiones) {
         }
     }
 
-    async cargarProductosRegion(regionId) {
-        try {
-            this.mostrarCargando('lista-productos', 'Cargando productos...');
-            
-            const params = new URLSearchParams();
-            if (this.filtros.subsector) params.append('subsector', this.filtros.subsector);
-            if (this.filtros.producto) params.append('producto', this.filtros.producto);
-            if (this.filtros.año) params.append('año', this.filtros.año);
-            
-            const url = `/api/region/${regionId}/productos/?${params.toString()}`;
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            
-            this.mostrarProductosRegion(data);
-            
-        } catch (error) {
-            console.error('Error cargando productos:', error);
-            this.mostrarError('lista-productos', 'Error cargando productos');
-        }
-    }
-
-    mostrarProductosRegion(data) {
+async cargarProductosRegion(regionId) {
+    try {
         const contenedor = document.getElementById('lista-productos');
         
-        if (!data.productos || data.productos.length === 0) {
-            contenedor.innerHTML = `
-                <div class="sin-resultados">
-                    <p>No se encontraron productos</p>
-                    <p class="texto-pequeno">Prueba ajustando los filtros</p>
-                </div>
-            `;
+        // Si el contenedor no existe, no hacer nada
+        if (!contenedor) {
             return;
         }
+        
+        this.mostrarCargando('lista-productos', 'Cargando productos...');
+        
+        const params = new URLSearchParams();
+        if (this.filtros.subsector) params.append('subsector', this.filtros.subsector);
+        if (this.filtros.producto) params.append('producto', this.filtros.producto);
+        if (this.filtros.año) params.append('año', this.filtros.año);
+        
+        const url = `/api/region/${regionId}/productos/?${params.toString()}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        this.mostrarProductosRegion(data);
+        
+    } catch (error) {
+        console.error('Error cargando productos:', error);
+        this.mostrarError('lista-productos', 'Error cargando productos');
+    }
+}
 
-        const productosHTML = data.productos.map(producto => {
-            const precioPromedio = producto.precio_promedio ? 
-                parseFloat(producto.precio_promedio) : 0;
-            const volumenTotal = producto.volumen_total ? 
-                parseFloat(producto.volumen_total) : 0;
-            
-            return `
-                <div class="producto-item">
-                    <div class="producto-header">
-                        <strong class="producto-nombre">${producto.producto__nombre || 'Nombre no disponible'}</strong>
-                        <span class="producto-subsector">${producto.subsector__nombre || 'Sin subsector'}</span>
+mostrarProductosRegion(data) {
+    const contenedor = document.getElementById('lista-productos');
+    
+    // VERIFICAR que el elemento existe antes de manipularlo
+    if (!contenedor) {
+        console.error('Elemento #lista-productos no encontrado en el DOM');
+        return;
+    }
+    
+    if (!data.productos || data.productos.length === 0) {
+        contenedor.innerHTML = `
+            <div class="sin-resultados">
+                <p>No se encontraron productos</p>
+                <p class="texto-pequeno">Prueba ajustando los filtros</p>
+            </div>
+        `;
+        return;
+    }
+
+    const productosHTML = data.productos.map(producto => {
+        const precioPromedio = producto.precio_promedio ? 
+            parseFloat(producto.precio_promedio) : 0;
+        const volumenTotal = producto.volumen_total ? 
+            parseFloat(producto.volumen_total) : 0;
+        
+        return `
+            <div class="producto-item">
+                <div class="producto-header">
+                    <strong class="producto-nombre">${producto.producto__nombre || 'Nombre no disponible'}</strong>
+                    <span class="producto-subsector">${producto.subsector__nombre || 'Sin subsector'}</span>
+                </div>
+                <div class="producto-stats">
+                    <div class="producto-stat">
+                        <span>Precio promedio:</span>
+                        <strong>$${precioPromedio.toFixed(2)}</strong>
                     </div>
-                    <div class="producto-stats">
-                        <div class="producto-stat">
-                            <span>Precio promedio:</span>
-                            <strong>$${precioPromedio.toFixed(2)}</strong>
-                        </div>
-                        <div class="producto-stat">
-                            <span>Volumen:</span>
-                            <strong>${volumenTotal.toLocaleString('es-CL')}</strong>
-                        </div>
-                        <div class="producto-stat">
-                            <span>Registros:</span>
-                            <strong>${producto.total_registros || '0'}</strong>
-                        </div>
+                    <div class="producto-stat">
+                        <span>Volumen:</span>
+                        <strong>${volumenTotal.toLocaleString('es-CL')}</strong>
+                    </div>
+                    <div class="producto-stat">
+                        <span>Registros:</span>
+                        <strong>${producto.total_registros || '0'}</strong>
                     </div>
                 </div>
-            `;
-        }).join('');
-
-        contenedor.innerHTML = `
-            <div class="resultados-info">
-                <p class="texto-pequeno">Mostrando ${data.total_resultados} productos</p>
-                ${data.filtros_aplicados && (data.filtros_aplicados.producto || data.filtros_aplicados.subsector || data.filtros_aplicados.año) ? 
-                    `<p class="texto-pequeno filtros-aplicados">Con filtros aplicados</p>` : ''
-                }
             </div>
-            ${productosHTML}
         `;
-    }
+    }).join('');
+
+    contenedor.innerHTML = `
+        <div class="resultados-info">
+            <p class="texto-pequeno">Mostrando ${data.total_resultados} productos</p>
+            ${data.filtros_aplicados && (data.filtros_aplicados.producto || data.filtros_aplicados.subsector || data.filtros_aplicados.año) ? 
+                `<p class="texto-pequeno filtros-aplicados">Con filtros aplicados</p>` : ''
+            }
+        </div>
+        ${productosHTML}
+    `;
+}
 }
 
 // Inicializar la aplicación cuando se carga la página
