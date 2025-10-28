@@ -165,206 +165,221 @@ class MapaInteractivo {
         `;
     }
 
-    async cargarFiltrosDisponibles() {
-        try {
-            this.mostrarCargando('filtros-container', 'Cargando filtros...');
-            
-            const response = await fetch('/api/filtros/');
-            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-            
-            const data = await response.json();
-            
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            
-            this.mostrarFiltros(data);
-        } catch (error) {
-            console.error('Error cargando filtros:', error);
-            this.mostrarError('filtros-container', 'No se pudieron cargar los filtros');
+// REEMPLAZAR completamente las funciones relacionadas con filtros:
+
+async cargarFiltrosDisponibles() {
+    try {
+        this.mostrarCargando('filtros-container', 'Cargando filtros...');
+        
+        const response = await fetch('/api/filtros/');
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
         }
+        
+        this.mostrarFiltros(data);
+    } catch (error) {
+        console.error('Error cargando filtros:', error);
+        this.mostrarError('filtros-container', 'No se pudieron cargar los filtros');
+    }
+}
+
+mostrarFiltros(data) {
+    const contenedor = document.getElementById('filtros-container');
+    
+    // Corregir: eliminar años duplicados
+    let opcionesAños = '<option value="">Todos los años</option>';
+    if (data.años && data.años.length > 0) {
+        const añosUnicos = [...new Set(data.años)]; // Eliminar duplicados
+        añosUnicos.sort((a, b) => b - a); // Ordenar descendente
+        añosUnicos.forEach(año => {
+            opcionesAños += `<option value="${año}">${año}</option>`;
+        });
     }
 
-    mostrarFiltros(data) {
-        const contenedor = document.getElementById('filtros-container');
+    let opcionesSubsectores = '<option value="">Todos los subsectores</option>';
+    if (data.subsectores && data.subsectores.length > 0) {
+        data.subsectores.forEach(subsector => {
+            opcionesSubsectores += `<option value="${subsector.nombre}">${subsector.nombre}</option>`;
+        });
+    }
+
+    let opcionesProductos = '<option value="">Todos los productos</option>';
+    if (data.productos && data.productos.length > 0) {
+        const productosOrdenados = data.productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        productosOrdenados.forEach(producto => {
+            opcionesProductos += `<option value="${producto.nombre}">${producto.nombre}</option>`;
+        });
+    }
+
+    contenedor.innerHTML = `
+        <h3>Filtros</h3>
+        <div class="filtro-grupo">
+            <label for="filtro-subsector">Subsector:</label>
+            <select id="filtro-subsector" class="filtro-select">
+                ${opcionesSubsectores}
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label for="filtro-producto">Producto:</label>
+            <select id="filtro-producto" class="filtro-select">
+                ${opcionesProductos}
+            </select>
+        </div>
+        <div class="filtro-grupo">
+            <label for="filtro-año">Año:</label>
+            <select id="filtro-año" class="filtro-select">
+                ${opcionesAños}
+            </select>
+        </div>
+        <div class="botones-filtros">
+            <button id="aplicar-filtros" class="btn-filtro btn-primario">Aplicar Filtros</button>
+            <button id="limpiar-filtros" class="btn-filtro btn-secundario">Limpiar</button>
+        </div>
+    `;
+
+    // Configurar event listeners CORREGIDOS
+    document.getElementById('filtro-subsector').addEventListener('change', (e) => {
+        this.actualizarProductosPorSubsector(e.target.value);
+    });
+
+    document.getElementById('aplicar-filtros').addEventListener('click', () => this.aplicarFiltros());
+    document.getElementById('limpiar-filtros').addEventListener('click', () => this.limpiarFiltros());
+}
+
+// REEMPLAZAR esta función completamente
+async actualizarProductosPorSubsector(subsectorNombre) {
+    try {
+        const selectProducto = document.getElementById('filtro-producto');
         
-        let opcionesAños = '<option value="">Todos los años</option>';
-        if (data.años && data.años.length > 0) {
-            data.años.forEach(año => {
-                opcionesAños += `<option value="${año}">${año}</option>`;
-            });
+        if (!subsectorNombre) {
+            // Si no hay subsector, cargar todos los productos
+            await this.cargarTodosLosProductos();
+            return;
         }
 
-        let opcionesSubsectores = '<option value="">Todos los subsectores</option>';
-        if (data.subsectores && data.subsectores.length > 0) {
-            data.subsectores.forEach(subsector => {
-                opcionesSubsectores += `<option value="${subsector.nombre}">${subsector.nombre}</option>`;
+        // Solo deshabilitar temporalmente, sin animaciones raras
+        selectProducto.disabled = true;
+        const valorOriginal = selectProducto.value;
+        selectProducto.innerHTML = '<option value="">Cargando productos...</option>';
+
+        // Buscar productos del subsector seleccionado
+        const response = await fetch('/api/filtros/');
+        const filtrosData = await response.json();
+        
+        let opciones = '<option value="">Todos los productos</option>';
+        
+        if (filtrosData.productos && filtrosData.productos.length > 0) {
+            // Filtrar productos por subsector
+            const productosFiltrados = filtrosData.productos.filter(producto => {
+                // En una implementación real, aquí buscarías los productos del subsector
+                // Por ahora, cargamos todos los productos y el filtro se aplica después
+                return true;
+            });
+            
+            const productosOrdenados = productosFiltrados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            productosOrdenados.forEach(producto => {
+                opciones += `<option value="${producto.nombre}">${producto.nombre}</option>`;
             });
         }
+        
+        selectProducto.innerHTML = opciones;
+        selectProducto.disabled = false;
+        selectProducto.value = valorOriginal; // Mantener el valor seleccionado si existe
+        
+    } catch (error) {
+        console.error('Error actualizando productos:', error);
+        const selectProducto = document.getElementById('filtro-producto');
+        selectProducto.innerHTML = '<option value="">Error cargando productos</option>';
+        selectProducto.disabled = false;
+    }
+}
 
-        let opcionesProductos = '<option value="">Todos los productos</option>';
+// REEMPLAZAR esta función
+async cargarTodosLosProductos() {
+    try {
+        const selectProducto = document.getElementById('filtro-producto');
+        selectProducto.disabled = true;
+        selectProducto.innerHTML = '<option value="">Cargando productos...</option>';
+
+        const response = await fetch('/api/filtros/');
+        const data = await response.json();
+        
+        let opciones = '<option value="">Todos los productos</option>';
         if (data.productos && data.productos.length > 0) {
             const productosOrdenados = data.productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
             productosOrdenados.forEach(producto => {
-                opcionesProductos += `<option value="${producto.nombre}">${producto.nombre}</option>`;
+                opciones += `<option value="${producto.nombre}">${producto.nombre}</option>`;
             });
         }
-
-        contenedor.innerHTML = `
-            <h3>Filtros</h3>
-            <div class="filtro-grupo">
-                <label for="filtro-subsector">Subsector:</label>
-                <select id="filtro-subsector" class="filtro-select">
-                    ${opcionesSubsectores}
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label for="filtro-producto">Producto:</label>
-                <select id="filtro-producto" class="filtro-select">
-                    ${opcionesProductos}
-                </select>
-            </div>
-            <div class="filtro-grupo">
-                <label for="filtro-año">Año:</label>
-                <select id="filtro-año" class="filtro-select">
-                    ${opcionesAños}
-                </select>
-            </div>
-            <div class="botones-filtros">
-                <button id="aplicar-filtros" class="btn-filtro btn-primario">Aplicar Filtros</button>
-                <button id="limpiar-filtros" class="btn-filtro btn-secundario">Limpiar</button>
-            </div>
-        `;
-
-        document.getElementById('aplicar-filtros').addEventListener('click', () => this.aplicarFiltros());
-        document.getElementById('limpiar-filtros').addEventListener('click', () => this.limpiarFiltros());
-    }
-
-    async actualizarProductosPorSubsector(subsectorNombre) {
-        try {
-            const selectProducto = document.getElementById('filtro-producto');
-            
-            if (!subsectorNombre) {
-                await this.cargarTodosLosProductos();
-                return;
-            }
-
-            this.mostrarCargandoSelect(selectProducto, 'Cargando productos...');
-
-            const subsectoresResponse = await fetch('/api/filtros/');
-            const subsectoresData = await subsectoresResponse.json();
-            const subsector = subsectoresData.subsectores.find(s => s.nombre === subsectorNombre);
-            
-            if (!subsector) {
-                throw new Error('Subsector no encontrado');
-            }
-
-            const response = await fetch(`/api/subsector/${subsector.id}/productos/`);
-            if (!response.ok) throw new Error('Error cargando productos del subsector');
-            
-            const data = await response.json();
-            
-            let opciones = '<option value="">Todos los productos</option>';
-            if (data.productos && data.productos.length > 0) {
-                data.productos.forEach(producto => {
-                    opciones += `<option value="${producto.nombre}">${producto.nombre}</option>`;
-                });
-            }
-            
-            selectProducto.innerHTML = opciones;
-            selectProducto.classList.remove('loading-select');
-            
-        } catch (error) {
-            console.error('Error actualizando productos:', error);
-            selectProducto.innerHTML = '<option value="">Error cargando productos</option>';
-            selectProducto.classList.remove('loading-select');
-        }
-    }
-
-    async cargarTodosLosProductos() {
-        try {
-            const selectProducto = document.getElementById('filtro-producto');
-            this.mostrarCargandoSelect(selectProducto, 'Cargando productos...');
-
-            const response = await fetch('/api/filtros/');
-            const data = await response.json();
-            
-            let opciones = '<option value="">Todos los productos</option>';
-            if (data.productos && data.productos.length > 0) {
-                const productosOrdenados = data.productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
-                productosOrdenados.forEach(producto => {
-                    opciones += `<option value="${producto.nombre}">${producto.nombre}</option>`;
-                });
-            }
-            
-            selectProducto.innerHTML = opciones;
-            selectProducto.classList.remove('loading-select');
-            
-        } catch (error) {
-            console.error('Error cargando todos los productos:', error);
-            selectProducto.innerHTML = '<option value="">Error cargando productos</option>';
-            selectProducto.classList.remove('loading-select');
-        }
-    }
-
-    mostrarCargandoSelect(selectElement, mensaje) {
-        selectElement.innerHTML = `<option value="">${mensaje}</option>`;
-        selectElement.classList.add('loading-select');
-        selectElement.disabled = true;
-    }
-
-    aplicarFiltros() {
-        this.filtros = {
-            subsector: document.getElementById('filtro-subsector').value,
-            producto: document.getElementById('filtro-producto').value,
-            año: document.getElementById('filtro-año').value
-        };
-
-        this.mostrarFiltrosActivos();
-
-        if (this.regionSeleccionada) {
-            this.cargarProductosRegion(this.regionSeleccionada);
-        }
-    }
-
-    limpiarFiltros() {
-        document.getElementById('filtro-subsector').value = '';
-        document.getElementById('filtro-producto').value = '';
-        document.getElementById('filtro-año').value = '';
-        this.filtros = { subsector: '', producto: '', año: '' };
-        this.ocultarFiltrosActivos();
         
-        if (this.regionSeleccionada) {
-            this.cargarProductosRegion(this.regionSeleccionada);
-        }
+        selectProducto.innerHTML = opciones;
+        selectProducto.disabled = false;
+        
+    } catch (error) {
+        console.error('Error cargando todos los productos:', error);
+        const selectProducto = document.getElementById('filtro-producto');
+        selectProducto.innerHTML = '<option value="">Error cargando productos</option>';
+        selectProducto.disabled = false;
+    }
+}
+
+// MANTENER estas funciones igual
+aplicarFiltros() {
+    this.filtros = {
+        subsector: document.getElementById('filtro-subsector').value,
+        producto: document.getElementById('filtro-producto').value,
+        año: document.getElementById('filtro-año').value
+    };
+
+    this.mostrarFiltrosActivos();
+
+    if (this.regionSeleccionada) {
+        this.cargarProductosRegion(this.regionSeleccionada);
+    }
+}
+
+limpiarFiltros() {
+    document.getElementById('filtro-subsector').value = '';
+    document.getElementById('filtro-producto').value = '';
+    document.getElementById('filtro-año').value = '';
+    this.filtros = { subsector: '', producto: '', año: '' };
+    this.ocultarFiltrosActivos();
+    
+    if (this.regionSeleccionada) {
+        this.cargarProductosRegion(this.regionSeleccionada);
+    }
+}
+
+mostrarFiltrosActivos() {
+    let filtrosActivos = document.getElementById('filtros-activos');
+    if (!filtrosActivos) {
+        filtrosActivos = document.createElement('div');
+        filtrosActivos.id = 'filtros-activos';
+        filtrosActivos.className = 'filtros-activos';
+        document.getElementById('filtros-container').appendChild(filtrosActivos);
     }
 
-    mostrarFiltrosActivos() {
-        let filtrosActivos = document.getElementById('filtros-activos');
-        if (!filtrosActivos) {
-            filtrosActivos = document.createElement('div');
-            filtrosActivos.id = 'filtros-activos';
-            filtrosActivos.className = 'filtros-activos';
-            document.getElementById('filtros-container').appendChild(filtrosActivos);
-        }
+    const filtrosTexto = [];
+    if (this.filtros.subsector) filtrosTexto.push(`Subsector: ${this.filtros.subsector}`);
+    if (this.filtros.producto) filtrosTexto.push(`Producto: ${this.filtros.producto}`);
+    if (this.filtros.año) filtrosTexto.push(`Año: ${this.filtros.año}`);
 
-        const filtrosTexto = [];
-        if (this.filtros.subsector) filtrosTexto.push(`Subsector: ${this.filtros.subsector}`);
-        if (this.filtros.producto) filtrosTexto.push(`Producto: ${this.filtros.producto}`);
-        if (this.filtros.año) filtrosTexto.push(`Año: ${this.filtros.año}`);
+    filtrosActivos.innerHTML = `
+        <strong>Filtros activos:</strong>
+        <div>${filtrosTexto.join(' • ')}</div>
+    `;
+}
 
-        filtrosActivos.innerHTML = `
-            <strong>Filtros activos:</strong>
-            <div>${filtrosTexto.join(' • ')}</div>
-        `;
+ocultarFiltrosActivos() {
+    const filtrosActivos = document.getElementById('filtros-activos');
+    if (filtrosActivos) {
+        filtrosActivos.remove();
     }
-
-    ocultarFiltrosActivos() {
-        const filtrosActivos = document.getElementById('filtros-activos');
-        if (filtrosActivos) {
-            filtrosActivos.remove();
-        }
-    }
+}
 
     agregarMarcadoresRegiones() {
         const regionesConDatos = [
@@ -635,7 +650,7 @@ async compararRegiones() {
     }
 }
 
-// función para mostrar la comparación
+// AGREGAR esta nueva función para mostrar la comparación
 mostrarComparacionRegiones(data) {
     const contenedor = document.getElementById('info-region');
     

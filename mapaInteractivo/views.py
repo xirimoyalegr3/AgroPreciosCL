@@ -77,39 +77,40 @@ def obtener_datos_region(request, region_id):
         logger.error(f"Error en obtener_datos_region: {str(e)}")
         return JsonResponse({'error': f'Error del servidor: {str(e)}'}, status=500)
 
+# mapaInteractivo/views.py - CORREGIR obtener_resumen_general
 def obtener_resumen_general(request):
     """API para obtener resumen general REAL de todas las regiones"""
     try:
-        with transaction.atomic():
-            total_registros = DatosComercializacion.objects.count()
-            total_regiones = Region.objects.count()
-            total_productos = Producto.objects.count()
-            total_mercados = Mercado.objects.count()
-            
-            fecha_reciente = (DatosComercializacion.objects
-                             .order_by('-fecha')
-                             .values('fecha')
-                             .first())
-            
-            estadisticas_regiones = (DatosComercializacion.objects
-                                    .values('region__id_region', 'region__nombre')
-                                    .annotate(
-                                        total_registros=Count('id'),
-                                        total_productos=Count('producto', distinct=True),
-                                        precio_promedio_global=Avg('precio_promedio')
-                                    )
-                                    .order_by('-total_registros'))
-            
-            datos = {
-                'total_registros': total_registros,
-                'total_regiones': total_regiones,
-                'total_productos': total_productos,
-                'total_mercados': total_mercados,
-                'fecha_reciente': fecha_reciente['fecha'] if fecha_reciente else None,
-                'estadisticas_regiones': list(estadisticas_regiones),
-            }
-            
-            return JsonResponse(datos)
+        # Estadísticas generales REALES
+        total_registros = DatosComercializacion.objects.count()
+        total_regiones = Region.objects.count()
+        total_productos = Producto.objects.count()
+        total_mercados = Mercado.objects.count()
+        
+        # Fecha del registro más reciente - CORREGIDO
+        ultimo_registro = DatosComercializacion.objects.order_by('-fecha').first()
+        fecha_reciente = ultimo_registro.fecha if ultimo_registro else None
+        
+        # Estadísticas por región - CORREGIDO: usar id_region en lugar de id
+        estadisticas_regiones = (DatosComercializacion.objects
+                                .values('region__id_region', 'region__nombre')
+                                .annotate(
+                                    total_registros=Count('id'),
+                                    total_productos=Count('producto', distinct=True),
+                                    precio_promedio_global=Avg('precio_promedio')
+                                )
+                                .order_by('-total_registros'))
+        
+        datos = {
+            'total_registros': total_registros,
+            'total_regiones': total_regiones,
+            'total_productos': total_productos,
+            'total_mercados': total_mercados,
+            'fecha_reciente': fecha_reciente.isoformat() if fecha_reciente else None,
+            'estadisticas_regiones': list(estadisticas_regiones),
+        }
+        
+        return JsonResponse(datos)
     
     except Exception as e:
         logger.error(f"Error en obtener_resumen_general: {str(e)}")
@@ -168,19 +169,25 @@ def obtener_productos_region(request, region_id):
         logger.error(f"Error en obtener_productos_region: {str(e)}")
         return JsonResponse({'error': f'Error del servidor: {str(e)}'}, status=500)
 
+# En mapaInteractivo/views.py - corregir obtener_filtros_disponibles
 def obtener_filtros_disponibles(request):
     """API para obtener opciones de filtros disponibles"""
     try:
         with transaction.atomic():
+            # Años disponibles - CORREGIDO: evitar duplicados
             años = (DatosComercializacion.objects
-                    .dates('fecha', 'year')
-                    .order_by('-fecha'))
+                    .dates('fecha', 'year', order='DESC')
+                    .distinct())
             
+            años_lista = [año.year for año in años]
+            
+            # Subsectores
             subsectores = (Subsector.objects
                           .annotate(total=Count('datoscomercializacion'))
                           .values('id', 'nombre')
                           .order_by('-total'))
             
+            # Productos
             productos = (Producto.objects
                         .annotate(total=Count('datoscomercializacion'))
                         .values('id', 'nombre')
@@ -188,7 +195,7 @@ def obtener_filtros_disponibles(request):
                         .distinct())
             
             datos = {
-                'años': [año.year for año in años],
+                'años': años_lista,
                 'subsectores': list(subsectores),
                 'productos': list(productos),
             }
