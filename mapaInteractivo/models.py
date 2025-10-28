@@ -1,4 +1,4 @@
-# models.py
+# mapaInteractivo/models.py 
 from django.db import models
 
 class Region(models.Model):
@@ -64,5 +64,15 @@ class ProgresoCarga(models.Model):
     fecha_inicio = models.DateTimeField(auto_now_add=True)
     fecha_fin = models.DateTimeField(null=True, blank=True)
     
+    def __str__(self):
+        return f"{self.archivo} - {self.lineas_procesadas}/{self.total_lineas}"
+    
+    def get_porcentaje(self):
+        """Calcula el porcentaje de completado"""
+        if self.total_lineas == 0:
+            return 0
+        return (self.lineas_procesadas / self.total_lineas) * 100
+
+        
     def __str__(self):
         return f"{self.archivo} - {self.lineas_procesadas}/{self.total_lineas}"
