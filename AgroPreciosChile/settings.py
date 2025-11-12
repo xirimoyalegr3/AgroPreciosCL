@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mapaInteractivo',
+    'predicciones',
 
 ]
 
@@ -83,7 +84,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'frutas_hortalizas_db',
         'USER': 'postgres',
-        'PASSWORD': 'DESAM2710',
+        'PASSWORD': '1234',
         'HOST': 'localhost',
         'PORT': '5432',
     }

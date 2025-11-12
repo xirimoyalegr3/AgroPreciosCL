@@ -1,0 +1,70 @@
+{% load custom_filters %}
+{% block content %}
+<h2 class="mt-4 text-center">
+  Predicción para <strong>{{ fruta }}</strong> ({{ unidad }}) en {{ region }}
+</h2>
+
+<hr>
+
+<div class="table-container mt-3">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Precio Predicho</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for fila in resultados %}
+        <tr>
+          <td>{{ fila.fecha }}</td>
+          <td>{{ fila.precio_predicho|floatformat:2 }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<hr>
+
+<h3 class="text-center mt-5">Gráfico de evolución del precio predicho</h3>
+<canvas id="graficoPredicciones" width="800" height="400"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const resultados = {{ resultados_json|safe }};
+  const fechas = resultados.map(f => f.fecha);
+  const precios = resultados.map(f => f.precio_predicho);
+
+  const ctx = document.getElementById('graficoPredicciones').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: fechas,
+      datasets: [{
+        label: 'Precio Predicho',
+        data: precios,
+        borderColor: '#007bff',
+        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointBackgroundColor: '#007bff',
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { title: { display: true, text: 'Fecha' } },
+        y: { title: { display: true, text: 'Precio ($)' } }
+      }
+    }
+  });
+</script>
+
+
+<div class="text-center mt-4">
+  <a href="{% url 'prediccion_home' %}" class="btn btn-primary">Nueva Predicción</a>
+</div>
+
+{% endblock %}

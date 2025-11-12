@@ -5,4 +5,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('mapaInteractivo.urls')),
+    path('predicciones/', include('predicciones.urls')),
 ]

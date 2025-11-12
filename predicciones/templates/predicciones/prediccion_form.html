@@ -1,0 +1,41 @@
+<form method="POST" action="{% url 'prediccion_home' %}">
+  {% csrf_token %}
+  
+  <div class="form-group">
+    <label for="fruta">Producto:</label>
+    <select name="fruta" id="fruta" class="form-control">
+      {% for p in productos %}
+        <option value="{{ p }}">{{ p }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="categoria">Categoría / Unidad:</label>
+    <select name="categoria" id="categoria" class="form-control">
+      {% for c in categorias %}
+        <option value="{{ c }}">{{ c }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="region">Región:</label>
+    <select name="region" id="region" class="form-control">
+      {% for r in regiones %}
+        <option value="{{ r }}">{{ r }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="horizonte">Horizonte de predicción:</label>
+    <select name="horizonte" id="horizonte" class="form-control">
+      <option value="7d">7 días</option>
+      <option value="4w">4 semanas</option>
+      <option value="4m">4 meses</option>
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Predecir</button>
+</form>
