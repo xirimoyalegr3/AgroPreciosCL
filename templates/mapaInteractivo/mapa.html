@@ -11,7 +11,6 @@
 <body>
     <div id="contenedor-principal">
         <div id="panel-lateral">
-                <div class="panel-drag-handle">
 
             <div id="resumen-general">
                 <h2>Agro Precios Chile</h2>
@@ -29,15 +28,15 @@
                 <h3>Informacion de Region</h3>
                 <p>Selecciona una region en el mapa</p>
             </div>
-
+<br>
         </div>
-</div>
 
         <div id="mapa-container">
             <div id="mapa"></div>
 
         </div>
     </div>
+<script src="{% static 'mapaInteractivo/js/panelController.js' %}"></script>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="{% static 'mapaInteractivo/js/mapa.js' %}"></script>
     <script src="{% static 'mapaInteractivo/js/dashboard.js' %}"></script>

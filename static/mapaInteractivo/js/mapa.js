@@ -10,7 +10,7 @@ class MapaInteractivo {
             año: ''
         };
         this.marcadoresRegiones = {};
-        this.panelSimple = null;
+        this.panelController = null;
 
         this.init();
     }
@@ -23,11 +23,11 @@ class MapaInteractivo {
         this.configurarEventListeners();
         this.inicializarPanelAnalisis();
         this.inicializarDashboard();
-        this.inicializarPanelSimple();
+        this.inicializarPanelController();
 
     }
-    inicializarPanelSimple() {
-        this.panelSimple = new PanelSimple();
+    inicializarPanelController() {
+        this.panelController = new PanelController();
     }
 
     inicializarMapa() {
