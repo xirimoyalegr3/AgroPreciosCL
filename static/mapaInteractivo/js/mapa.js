@@ -20,6 +20,8 @@ class MapaInteractivo {
         this.agregarMarcadoresRegiones();
         this.configurarEventListeners();
         this.inicializarPanelAnalisis();
+        this.inicializarDashboard(); 
+
     }
 
     inicializarMapa() {
@@ -33,6 +35,10 @@ class MapaInteractivo {
 
         L.control.scale({imperial: false}).addTo(this.mapa);
     }
+
+    inicializarDashboard() {
+    this.dashboard = new DashboardAnalisis(this);
+}
 
     configurarEventListeners() {
         document.addEventListener('change', (e) => {

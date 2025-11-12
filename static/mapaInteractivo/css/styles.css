@@ -564,8 +564,6 @@ body {
     background: #a8a8a8;
 }
 
-
-
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -576,23 +574,23 @@ body {
     #contenedor-principal {
         flex-direction: column;
     }
-    
+
     #panel-lateral {
         width: 100%;
         height: 40vh;
         border-right: none;
         border-bottom: 2px solid #dee2e6;
     }
-    
+
     #mapa-container {
         height: 60vh;
     }
-    
+
     .region-stats {
         flex-direction: column;
         gap: 5px;
     }
-    
+
     .producto-stats {
         flex-direction: column;
         gap: 8px;
@@ -693,15 +691,468 @@ body {
     .tabla-comparacion {
         font-size: 0.8em;
     }
-    
+
     .tabla-comparacion th,
     .tabla-comparacion td {
         padding: 6px 4px;
     }
-    
+
     .metrica-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 5px;
     }
+}
+/* ESTILOS PARA EL DASHBOARD DE ANÁLISIS */
+.btn-dashboard {
+    width: 100%;
+    padding: 12px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.3s ease;
+}
+
+.btn-dashboard:hover {
+    background: #218838;
+}
+
+/* OVERLAY Y CONTENEDOR DEL DASHBOARD */
+.dashboard-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    display: none;
+}
+
+.dashboard-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 85%;
+    background: white;
+    border-radius: 12px;
+    z-index: 10001;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 2px solid #e9ecef;
+    background: #2c5aa0;
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+    color: white;
+}
+
+.dashboard-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-dashboard-control {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-dashboard-control:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.dashboard-content {
+    padding: 20px;
+    height: calc(100% - 80px);
+    overflow-y: auto;
+}
+
+/* ESTADOS DEL DASHBOARD */
+.dashboard-minimized {
+    height: 60px;
+    width: 300px;
+    top: 20px;
+    left: 20px;
+    transform: none;
+}
+
+.dashboard-minimized .dashboard-content {
+    display: none;
+}
+
+/* SECCIONES DEL DASHBOARD */
+.dashboard-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.dashboard-section h3 {
+    color: #2c5aa0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 8px;
+}
+
+/* GRID DE MÉTRICAS */
+.metricas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.metrica-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.metrica-valor {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #2c5aa0;
+    display: block;
+}
+
+.metrica-label {
+    font-size: 0.9em;
+    color: #6c757d;
+}
+
+.metrica-tendencia {
+    font-size: 0.8em;
+    margin-top: 5px;
+}
+
+.tendencia-positiva {
+    color: #28a745;
+}
+
+.tendencia-negativa {
+    color: #dc3545;
+}
+
+/* TABLAS DE ANÁLISIS */
+.tabla-analisis {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+
+.tabla-analisis th,
+.tabla-analisis td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.tabla-analisis th {
+    background: #e9ecef;
+    font-weight: 600;
+}
+
+.tabla-analisis tr:hover {
+    background: #f8f9fa;
+}
+
+/* GRÁFICOS Y VISUALIZACIONES */
+.chart-container {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-top: 15px;
+}
+
+.chart-placeholder {
+    height: 200px;
+    background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%),
+                linear-gradient(-45deg, #f8f9fa 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #f8f9fa 75%),
+                linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* BOTONES DE EXPORTACIÓN */
+.botones-exportacion {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.btn-exportar {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-exportar-pdf {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-exportar-excel {
+    background: #28a745;
+    color: white;
+}
+
+.btn-exportar:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* LOADING DASHBOARD */
+.dashboard-loading {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.dashboard-error {
+    text-align: center;
+    padding: 40px;
+    color: #dc3545;
+    background: #f8d7da;
+    border-radius: 8px;
+}
+/* BOTÓN FLOTANTE PARA DASHBOARD */
+.btn-dashboard-flotante {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+.btn-dashboard-flotante:hover {
+    background: #218838;
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.btn-dashboard-flotante:active {
+    transform: scale(0.95);
+}
+
+/* Tooltip para el botón flotante */
+.btn-dashboard-flotante::after {
+    content: "Dashboard de Análisis";
+    position: absolute;
+    right: 70px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.btn-dashboard-flotante:hover::after {
+    opacity: 1;
+
+    /* MEJORAR ESTILOS DE TABLAS */
+.tabla-analisis {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.85em;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tabla-analisis th,
+.tabla-analisis td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.tabla-analisis th {
+    background: #2c5aa0;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.tabla-analisis tr:hover {
+    background: #f8f9fa;
+}
+
+.tabla-analisis tr:last-child td {
+    border-bottom: none;
+}
+
+/* MEJORAR MÉTRICAS */
+.metricas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.metrica-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.metrica-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.metrica-valor {
+    font-size: 2em;
+    font-weight: bold;
+    color: #2c5aa0;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.metrica-label {
+    font-size: 0.85em;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.metrica-sin-datos {
+    font-size: 0.8em;
+    color: #dc3545;
+    font-style: italic;
+}
+
+/* MEJORAR TENDENCIAS */
+.tendencia-positiva {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.tendencia-negativa {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.tendencia-estable {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+/* SCROLL HORIZONTAL PARA TABLAS */
+.tabla-container {
+    overflow-x: auto;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+/* MEJORAR NÚMEROS GRANDES */
+.numero-grande {
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.precio-formateado {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+/* BADGES PARA POTENCIAL/RIESGO */
+.badge-potencial {
+    background: #28a745;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+}
+
+.badge-riesgo {
+    background: #dc3545;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+}
+
+.badge-medio {
+    background: #ffc107;
+    color: #212529;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+}
+
+.badge-bajo {
+    background: #17a2b8;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+}
 }
