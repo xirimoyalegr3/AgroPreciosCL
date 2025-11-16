@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mapaInteractivo',
+    'predicciones',
+    'django_select2',
 
 ]
 
@@ -83,12 +85,27 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'frutas_hortalizas_db',
         'USER': 'postgres',
-        'PASSWORD': 'DESAM2710',
+        'PASSWORD': '1234',
         'HOST': 'localhost',
         'PORT': '5432',
     }
 }
 
+# Configuración de cache (para desarrollo)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+
+# Opcional: Configurar tiempo de cache para select2
+SELECT2_CACHE_BACKEND = 'default'
+# Configuración de select2
+SELECT2_JS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js'
+SELECT2_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'
+SELECT2_I18N_PATH = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/i18n/'
 # Optimizaciones para grandes volúmenes de datos
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
 
