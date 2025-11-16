@@ -2,7 +2,7 @@ import os
 import json
 import pandas as pd
 from django.core.management.base import BaseCommand
-from mapaInteractivo.models import (Region, Mercado, Subsector, Producto,
+from mapaInteractivo.models import (Region, Mercado, Subsector, Producto, 
                                    Variedad, DatosComercializacion)
 from datetime import datetime
 import decimal
@@ -33,14 +33,14 @@ class Command(BaseCommand):
             self.stdout.write(f'Procesando {archivo} desde chunk {chunk_actual}...')
             self.cargar_en_chunks(ruta_completa, archivo, progreso_path, progreso, chunk_actual)
 
-        self.stdout.write(self.style.SUCCESS(' Carga completa.'))
+        self.stdout.write(self.style.SUCCESS('✅ Carga completa.'))
 
     # ----------------------------------------------------------------------
 
     def cargar_en_chunks(self, ruta_archivo, nombre_archivo, progreso_path, progreso, chunk_inicio=0):
-        chunk_size = 50000 # número de filas por bloque
+        chunk_size = 50000  # número de filas por bloque
         chunk_iter = pd.read_csv(ruta_archivo, encoding='UTF-8-SIG', delimiter=',', chunksize=chunk_size)
-
+        
         # Cache de datos existentes
         regiones_cache = {r.id_region: r for r in Region.objects.all()}
         mercados_cache = {}
@@ -50,10 +50,10 @@ class Command(BaseCommand):
 
         for i, df in enumerate(chunk_iter):
             if i < chunk_inicio:
-                continue # saltar chunks ya procesados
+                continue  # saltar chunks ya procesados
 
-            self.stdout.write(f' Chunk {i} procesando...')
-
+            self.stdout.write(f'🧩 Chunk {i} procesando...')
+            
             # Limpiar nombres de columnas
             df.columns = [c.strip().replace('\ufeff', '') for c in df.columns]
             df = self.limpiar_datos(df)
@@ -62,7 +62,7 @@ class Command(BaseCommand):
             for _, row in df.iterrows():
                 try:
                     # Validar datos esenciales
-                    if (pd.isna(row.get('ID region')) or pd.isna(row.get('Producto')) or
+                    if (pd.isna(row.get('ID region')) or pd.isna(row.get('Producto')) or 
                         pd.isna(row.get('Subsector'))):
                         continue
 
@@ -148,7 +148,7 @@ class Command(BaseCommand):
                 except Exception as e:
                     # Solo mostrar error si es crítico, omitir en grandes volúmenes
                     if "decimal" in str(e).lower():
-                        self.stdout.write(f" Error decimal en fila: {e}")
+                        self.stdout.write(f"⚠️ Error decimal en fila: {e}")
                     continue
 
             # Guardar por bloques en DB
@@ -174,12 +174,12 @@ class Command(BaseCommand):
             if col in df.columns:
                 # Convertir a string, reemplazar comas por puntos, y luego a numérico
                 df[col] = df[col].astype(str)
-                df[col] = df[col].str.replace('.', '', regex=False) # Remover puntos de miles
-                df[col] = df[col].str.replace(',', '.', regex=False) # Coma a punto decimal
+                df[col] = df[col].str.replace('.', '', regex=False)  # Remover puntos de miles
+                df[col] = df[col].str.replace(',', '.', regex=False)  # Coma a punto decimal
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
 
         # Limpiar columnas de texto
-        text_columns = ['Region', 'Mercado', 'Subsector', 'Producto', 'Variedad / Tipo',
+        text_columns = ['Region', 'Mercado', 'Subsector', 'Producto', 'Variedad / Tipo', 
                        'Calidad', 'Unidad de comercializacion', 'Origen']
         for col in text_columns:
             if col in df.columns:

@@ -1,95 +1,88 @@
-{% extends "predicciones/base.html" %}
+{% extends "base.html" %}
 {% load static %}
 
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'mapaInteractivo/css/prediccion.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-chart-line me-2"></i>Predicción de Precios
-                    </h4>
-                </div>
-                <div class="card-body">
-                    {% if error %}
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+
+<div class="pred-container">
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Predicción de Precios</h2>
+        </div>
+
+        <div class="card-body">
+
+            {% if error %}
+            <div class="alert-error">
+                ⚠️ {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'prediccion_home' %}">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Producto:</label>
+                        {{ form.fruta }}
+                        {% if form.fruta.errors %}
+                        <div class="error-text">{{ form.fruta.errors }}</div>
+                        {% endif %}
                     </div>
-                    {% endif %}
 
-                    <form method="POST" action="{% url 'prediccion_home' %}">
-                        {% csrf_token %}
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_fruta" class="form-label fw-bold">Producto:</label>
-                                {{ form.fruta }}
-                                {% if form.fruta.errors %}
-                                <div class="text-danger small">{{ form.fruta.errors }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="id_categoria" class="form-label fw-bold">Categoría / Unidad:</label>
-                                {{ form.categoria }}
-                                {% if form.categoria.errors %}
-                                <div class="text-danger small">{{ form.categoria.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_region" class="form-label fw-bold">Región:</label>
-                                {{ form.region }}
-                                {% if form.region.errors %}
-                                <div class="text-danger small">{{ form.region.errors }}</div>
-                                {% endif %}
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="id_horizonte" class="form-label fw-bold">Horizonte:</label>
-                                {{ form.horizonte }}
-                                {% if form.horizonte.errors %}
-                                <div class="text-danger small">{{ form.horizonte.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg px-5">
-                                <i class="fas fa-bolt me-2"></i>Generar Predicción
-                            </button>
-                        </div>
-                    </form>
+                    <div class="form-field">
+                        <label>Categoría / Unidad:</label>
+                        {{ form.categoria }}
+                        {% if form.categoria.errors %}
+                        <div class="error-text">{{ form.categoria.errors }}</div>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Información adicional -->
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h5 class="card-title">💡 ¿Cómo funciona?</h5>
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-check text-success me-2"></i>Selecciona un producto, categoría y región</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Elige el horizonte de predicción</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Obtén predicciones basadas en datos históricos de ODEPA</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Las predicciones empiezan desde el próximo ciclo ODEPA después del último dato disponible</li>
-                    </ul>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Región:</label>
+                        {{ form.region }}
+                        {% if form.region.errors %}
+                        <div class="error-text">{{ form.region.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label>Horizonte:</label>
+                        {{ form.horizonte }}
+                        {% if form.horizonte.errors %}
+                        <div class="error-text">{{ form.horizonte.errors }}</div>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
+
+                <div class="center">
+                    <button type="submit" class="btn-pred">Generar Predicción</button>
+                </div>
+
+            </form>
         </div>
     </div>
+
+    <!-- Información extra -->
+    <div class="card info">
+        <div class="card-body">
+            <h3>💡 ¿Cómo funciona?</h3>
+
+            <ul class="info-list">
+                <li>✔ Selecciona un producto, categoría y región.</li>
+                <li>✔ Elige el horizonte de predicción.</li>
+                <li>✔ Predicciones basadas en datos históricos de ODEPA.</li>
+                <li>✔ La predicción comienza desde el próximo ciclo ODEPA.</li>
+            </ul>
+        </div>
+    </div>
+
 </div>
 
-<style>
-.form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-.card {
-    border: none;
-    border-radius: 12px;
-}
-</style>
 {% endblock %}

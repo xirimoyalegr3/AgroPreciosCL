@@ -1,46 +1,41 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa Interactivo - Precios Frutas y Hortalizas Chile</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'mapaInteractivo/css/styles.css' %}">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-</head>
-<body>
-    <div id="contenedor-principal">
-        <div id="panel-lateral">
+{% extends 'base.html' %}
+{% load static %}
 
-            <div id="resumen-general">
-                <h2>Agro Precios Chile</h2>
-                <div id="estadisticas-globales">
-                    <p>Cargando estadisticas...</p>
-                </div>
-            </div>
+{% block extra_styles %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+<link rel="stylesheet" href="{% static 'mapaInteractivo/css/styles.css' %}">
+{% endblock %}
 
-            <div id="filtros-container">
-                <h3>Filtros</h3>
-                <p>Cargando filtros...</p>
-            </div>
+{% block content %}
 
-            <div id="info-region">
-                <h3>Informacion de Region</h3>
-                <p>Selecciona una region en el mapa</p>
+<div id="contenedor-principal">
+    <div id="panel-lateral">
+        <div id="resumen-general">
+            <h2>Agro Precios Chile</h2>
+            <div id="estadisticas-globales">
+                <p>Cargando estadisticas...</p>
             </div>
-<br>
         </div>
-
-        <div id="mapa-container">
-            <div id="mapa"></div>
-
+        
+        <div id="filtros-container">
+            <h3>Filtros</h3>
+            <p>Cargando filtros...</p>
+        </div>
+        
+        <div id="info-region">
+            <h3>Información de Región</h3>
+            <p>Selecciona una región en el mapa</p>
         </div>
     </div>
-<script src="{% static 'mapaInteractivo/js/panelController.js' %}"></script>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="{% static 'mapaInteractivo/js/mapa.js' %}"></script>
-    <script src="{% static 'mapaInteractivo/js/dashboard.js' %}"></script>
-    <script src="{% static 'mapaInteractivo/js/panelSimple.js' %}"></script>
+    
+    <div id="mapa-container">
+        <div id="mapa"></div>
+    </div>
+</div>
 
-</body>
-</html>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="{% static 'mapaInteractivo/js/mapa.js' %}"></script>
+{% endblock %}

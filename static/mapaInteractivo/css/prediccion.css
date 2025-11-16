@@ -1,0 +1,176 @@
+/* Reset general */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+/* Contenedor principal */
+.pred-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Tarjetas generales */
+.card {
+    background: #dfdfdf;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    padding: 20px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.card-header h2, 
+.card-header h3 {
+    color: #2c5aa0;
+    font-size: 1.4em;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Formularios */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    transition: all .2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #2c5aa0;
+    box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2);
+}
+
+/* Botón principal */
+.btn-pred {
+    margin-top: 15px;
+    padding: 12px 16px;
+    background: #2c5aa0;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s ease;
+    width: 100%;
+    font-size: 15px;
+}
+
+.btn-pred:hover {
+    background: #1e3d6f;
+}
+
+/* Resultados */
+.resultado-container {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.resultado-label {
+    font-size: 1em;
+    color: #495057;
+}
+
+.resultado-valor {
+    color: #2c5aa0;
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+/* Tabla de predicciones */
+.table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+.pred-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+.pred-table thead th {
+    background: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    padding: 10px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.pred-table td {
+    padding: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.pred-table tr:hover {
+    background: #edf3ff;
+}
+
+/* Mensajes */
+.msg-info {
+    padding: 12px;
+    background: #e7f3ff;
+    border-left: 4px solid #2c5aa0;
+    color: #2c5aa0;
+    border-radius: 6px;
+    margin-top: 15px;
+}
+
+.msg-error {
+    padding: 12px;
+    background: #f8d7da;
+    border-left: 4px solid #dc3545;
+    color: #842029;
+    border-radius: 6px;
+    margin-top: 15px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

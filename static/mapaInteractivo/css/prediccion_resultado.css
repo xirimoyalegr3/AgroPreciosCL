@@ -1,0 +1,231 @@
+/* Reset general */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+/* Contenedor general */
+.container-fluid {
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+/* Estilo general de títulos */
+h2 strong.text-primary {
+    color: #2c5aa0 !important;
+}
+
+.text-primary {
+    color: #2c5aa0 !important;
+}
+
+/* Alertas */
+.alert-info {
+    background: #e7f3ff;
+    border-left: 4px solid #2c5aa0;
+    color: #2c5aa0;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.alert-warning {
+    background: #fff4d6;
+    border-left: 4px solid #d98c00;
+    color: #5a3c00;
+    border-radius: 10px;
+    padding: 18px;
+}
+
+/* Tarjetas */
+.card {
+    background: #dfdfdf;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: none !important;
+}
+
+.card-header {
+    padding: 18px 22px;
+    border-bottom: 2px solid #e9ecef !important;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.card-header.bg-primary {
+    background: #4678c3 !important;
+}
+
+.card-header.bg-success {
+    background: #6da1e0 !important;
+}
+
+/* Texto en tarjetas */
+.card-title {
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 20px !important;
+}
+
+/* Métricas */
+.card-header.bg-light {
+    background: #f8f9fa !important;
+}
+
+.card .border-end {
+    border-right: 2px solid #e1e1e1;
+}
+
+.text-success { color: #1e8f3e !important; }
+.text-warning { color: #c29100 !important; }
+.text-danger  { color: #c40000 !important; }
+.text-info    { color: #007b9e !important; }
+
+/* Tabla de predicciones */
+.table-responsive {
+    border-radius: 12px;
+}
+
+.table {
+    font-size: 0.95em;
+}
+
+.table thead {
+    background: #f0f4ff;
+}
+
+.table thead th {
+    color: #2c5aa0 !important;
+    font-weight: 600;
+}
+
+.table-hover tbody tr:hover {
+    background: #edf3ff !important;
+}
+
+.table-striped tbody tr:nth-child(even) {
+    background: #f7f7f7;
+}
+
+.table td, .table th {
+    padding: 12px !important;
+}
+
+/* Tabla sticky header */
+thead.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* Gráfico */
+.chart-container {
+    width: 100%;
+    height: 400px;
+    padding: 10px;
+}
+
+/* Pie de tarjeta */
+.card-footer {
+    padding: 15px 20px !important;
+    background: #f8f9fa !important;
+    border-radius: 0 0 12px 12px !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Pequeñas mejoras visuales */
+strong {
+    color: #2c5aa0;
+}
+
+.h6.mb-0 {
+    color: #2c5aa0;
+}
+
+/* Mejoras responsivas */
+@media (max-width: 768px) {
+    .card-header h5 {
+        font-size: 1rem;
+    }
+
+    .alert-info .row > div {
+        margin-bottom: 10px;
+    }
+
+    h2 {
+        font-size: 1.3em;
+    }
+}
+
+/* Asegura que la fila se comporte como flex en todas las pantallas */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* La tarjeta del gráfico debe crecer más */
+.col-lg-8 {
+    flex: 0 0 66.6667%;
+    max-width: 66.6667%;
+}
+
+/* La tarjeta de tabla ocupa menos */
+.col-lg-4 {
+    flex: 0 0 33.3333%;
+    max-width: 33.3333%;
+}
+
+/* Para pantallas medianas o pequeñas, que se pongan uno debajo del otro */
+@media (max-width: 991px) {
+    .col-lg-8, .col-lg-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Más espacio entre las columnas de las métricas */
+.metricas-row .col-md-3 {
+    padding-right: 25px !important;
+}
+
+/* Más separación interna entre textos */
+.metricas-row h3 {
+    margin-bottom: 10px !important;
+}
+
+.metricas-row small {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.alert-info .col-md-4 {
+    padding-right: 25px;
+    border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+.alert-info .col-md-4:last-child {
+    border-right: none; /* Elimina la línea de la última columna */
+}
