@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'mapaInteractivo/css/prediccion_resultado.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="text-center mb-2">
+        Predicción para <strong class="text-primary">{{ fruta }}</strong> 
+        <small class="text-muted">({{ unidad }}) en {{ region }}</small>
+      </h2>
+      <p class="text-center text-muted mb-0">
+        📅 Próximas {{ resultados|length }} semanas a partir del <strong>{{ proximo_lunes }}</strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- Información de fechas -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="alert alert-info">
+        <div class="row">
+          <div class="col-md-4">
+            <strong>📊 Último dato disponible:</strong><br>
+            {% if ultimo_dato_real %}
+              ${{ ultimo_dato_real.precio|floatformat:2 }} el {{ ultimo_dato_real.fecha }}
+            {% else %}
+              No hay datos históricos recientes
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <strong>🎯 Inicio de predicciones:</strong><br>
+            {{ proximo_lunes }} (próximo ciclo ODEPA)
+          </div>
+          <div class="col-md-4">
+            <strong>📈 Horizonte:</strong><br>
+            {{ resultados|length }} semana{{ resultados|length|pluralize }}
+          </div>
+        </div>
+        {% if dias_sin_datos and dias_sin_datos > 0 %}
+        <div class="mt-2">
+          <small class="text-muted">
+            <i class="fas fa-info-circle"></i> 
+            Nota: Hay {{ dias_sin_datos }} día{{ dias_sin_datos|pluralize }} sin datos entre el último registro y el inicio de las predicciones
+          </small>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Métricas de confianza -->
+{% if metricas %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-light">
+        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Métricas de la Predicción</h6>
+      </div>
+      <div class="card-body">
+        <div class="row text-center metricas-row">
+          <div class="col-md-3 mb-3">
+            <div class="border-end">
+              <h3 class="{% if metricas.confianza > 80 %}text-success{% elif metricas.confianza > 60 %}text-warning{% else %}text-danger{% endif %} mb-1">
+                {{ metricas.confianza }}%
+              </h3>
+              <small class="text-muted">
+                <i class="fas fa-shield-alt me-1"></i>Confianza
+              </small>
+              <br>
+              <small class="text-muted" style="font-size: 0.7rem;">
+                {% if metricas.confianza > 80 %}Alta confianza
+                {% elif metricas.confianza > 60 %}Confianza media
+                {% else %}Baja confianza{% endif %}
+              </small>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="border-end">
+              <h3 class="{% if metricas.tendencia == 'ascendente' %}text-success{% elif metricas.tendencia == 'descendente' %}text-danger{% else %}text-warning{% endif %} mb-1">
+                <i class="fas fa-{% if metricas.tendencia == 'ascendente' %}arrow-up{% elif metricas.tendencia == 'descendente' %}arrow-down{% else %}minus{% endif %}"></i>
+              </h3>
+              <small class="text-muted">
+                <i class="fas fa-chart-line me-1"></i>Tendencia
+              </small>
+              <br>
+              <small class="text-muted" style="font-size: 0.7rem;">
+                {% if metricas.tendencia == 'ascendente' %}Alza
+                {% elif metricas.tendencia == 'descendente' %}Baja
+                {% else %}Estable{% endif %}
+              </small>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="border-end">
+              <h3 class="{% if metricas.volatilidad == 'baja' %}text-success{% elif metricas.volatilidad == 'media' %}text-warning{% else %}text-danger{% endif %} mb-1">
+                <i class="fas fa-{% if metricas.volatilidad == 'baja' %}shield{% elif metricas.volatilidad == 'media' %}exclamation-triangle{% else %}bolt{% endif %}"></i>
+              </h3>
+              <small class="text-muted">
+                <i class="fas fa-wave-square me-1"></i>Volatilidad
+              </small>
+              <br>
+              <small class="text-muted" style="font-size: 0.7rem;">
+                {{ metricas.volatilidad|title }}
+              </small>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div>
+              <h3 class="text-info mb-1">
+                <i class="fas fa-bullseye"></i>
+              </h3>
+              <small class="text-muted">
+                <i class="fas fa-crosshairs me-1"></i>Precisión
+              </small>
+              <br>
+              <small class="text-muted" style="font-size: 0.7rem;">
+                RMSE: ${{ metricas.rmse }}
+              </small>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Información adicional de métricas -->
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="bg-light p-2 rounded">
+              <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                <strong>Confianza:</strong> Basada en el error de predicción vs datos históricos | 
+                <strong>Tendencia:</strong> Dirección general de las predicciones | 
+                <strong>Volatilidad:</strong> Variabilidad esperada en los precios
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+  <!-- Contenido principal: Tabla + Gráfico -->
+  <div class="row align-items-stretch">
+    <!-- Tabla de predicciones - Izquierda -->
+    <div class="col-lg-4 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-table me-2"></i>Predicciones Semanales
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+            <table class="table table-hover table-striped mb-0">
+              <thead class="table-light sticky-top">
+                <tr>
+                  <th class="ps-3">#</th>
+                  <th>Fecha</th>
+                  <th class="text-end pe-3">Precio Pred.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for fila in resultados %}
+                <tr>
+                  <td class="ps-3 fw-bold text-muted">{{ forloop.counter }}</td>
+                  <td>
+                    <small class="text-muted">Sem {{ forloop.counter }}</small><br>
+                    <strong>{{ fila.fecha }}</strong>
+                  </td>
+                  <td class="text-end pe-3">
+                    <span class="h6 mb-0 text-success">${{ fila.precio_predicho }}</span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card-footer bg-light">
+          <small class="text-muted">
+            <i class="fas fa-info-circle me-1"></i>
+            Mostrando {{ resultados|length }} semanas de predicción
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico - Derecha -->
+    <div class="col-lg-8 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-chart-line me-2"></i>Evolución del Precio
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+            <canvas id="graficoPrecios"></canvas>
+          </div>
+        </div>
+        <div class="card-footer bg-light">
+          <div class="row">
+            <div class="col-md-6">
+              <small class="text-muted">
+                <span class="text-danger">●</span> <strong>Último dato real</strong> - Precio normalizado registrado
+              </small>
+            </div>
+            <div class="col-md-6">
+              <small class="text-muted">
+                <span class="text-success">●</span> <strong>Predicciones</strong> - Comportamiento esperado
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información adicional -->
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="alert alert-warning">
+        <div class="row">
+          <div class="col-md-8">
+            <strong>💡 Información importante:</strong><br>
+            <small>
+              • Los datos de ODEPA se actualizan semanalmente los lunes<br>
+              • Los precios están normalizados para comparación consistente<br>
+              • Las predicciones muestran el comportamiento esperado basado en datos históricos
+            </small>
+          </div>
+          <div class="col-md-4 text-end">
+            <a href="{% url 'prediccion_home' %}" class="btn btn-primary btn-lg">
+              <i class="fas fa-plus me-2"></i>Nueva Predicción
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script>
+  const datosGrafico = {{ datos_grafico_json|safe }};
+  
+  // Preparar datos para el gráfico
+  const labels = [];
+  const preciosPredichos = [];
+  const preciosReales = [];
+  
+  // Agregar último dato real si existe
+  if (datosGrafico.ultimo_real) {
+    labels.push(`Último dato\n${datosGrafico.ultimo_real.fecha}`);
+    preciosReales.push(datosGrafico.ultimo_real.precio);
+    preciosPredichos.push(null);
+  }
+  
+  // Agregar predicciones
+  datosGrafico.predicciones.forEach(pred => {
+    labels.push(`Sem ${datosGrafico.predicciones.indexOf(pred) + 1}\n${pred.fecha}`);
+    preciosPredichos.push(pred.precio);
+    preciosReales.push(null);
+  });
+
+  // Configuración del gráfico
+  const ctx = document.getElementById('graficoPrecios').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Precios Predichos',
+          data: preciosPredichos,
+          borderColor: '#28a745',
+          backgroundColor: 'rgba(40, 167, 69, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#28a745',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 1,
+          pointHoverRadius: 6,
+        },
+        {
+          label: 'Último Dato Real',
+          data: preciosReales,
+          borderColor: '#dc3545',
+          backgroundColor: 'rgba(220, 53, 69, 0.1)',
+          borderWidth: 2,
+          fill: false,
+          pointRadius: 8,
+          pointBackgroundColor: '#dc3545',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointHoverRadius: 10,
+          showLine: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
+      scales: {
+        x: { 
+          title: { 
+            display: true, 
+            text: 'Semanas de Predicción',
+            font: { size: 12, weight: 'bold' }
+          },
+          ticks: { 
+            maxRotation: 0,
+            font: { size: 11 }
+          },
+          grid: {
+            color: 'rgba(0,0,0,0.1)'
+          }
+        },
+        y: { 
+          title: { 
+            display: true, 
+            text: 'Precio ($ CLP)',
+            font: { size: 12, weight: 'bold' }
+          },
+          beginAtZero: false,
+          ticks: {
+            callback: function(value) {
+              return '$' + value.toLocaleString('es-CL');
+            },
+            font: { size: 11 }
+          },
+          grid: {
+            color: 'rgba(0,0,0,0.1)'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            font: { size: 12 },
+            usePointStyle: true,
+            padding: 20
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          titleFont: { size: 12 },
+          bodyFont: { size: 13 },
+          padding: 12,
+          callbacks: {
+            label: function(context) {
+              let label = context.dataset.label || '';
+              if (context.parsed.y !== null) {
+                label += ': $' + context.parsed.y.toLocaleString('es-CL');
+              }
+              return label;
+            }
+          }
+        }
+      }
+    }
+  });
+</script>
+
+<style>
+.card {
+  border: none;
+  border-radius: 12px;
+}
+.card-header {
+  border-radius: 12px 12px 0 0 !important;
+  border: none;
+}
+.table th {
+  border-top: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.table td {
+  vertical-align: middle;
+  border-color: #f8f9fa;
+}
+.table tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+.sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.chart-container {
+  border-radius: 8px;
+}
+.btn-primary {
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 10px 24px;
+}
+.alert {
+  border-radius: 10px;
+  border: none;
+}
+</style>
+{% endblock %}

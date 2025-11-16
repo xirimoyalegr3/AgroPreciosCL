@@ -10,8 +10,6 @@ class MapaInteractivo {
             año: ''
         };
         this.marcadoresRegiones = {};
-        this.panelController = null;
-
         this.init();
     }
 
@@ -22,12 +20,6 @@ class MapaInteractivo {
         this.agregarMarcadoresRegiones();
         this.configurarEventListeners();
         this.inicializarPanelAnalisis();
-        this.inicializarDashboard();
-        this.inicializarPanelController();
-
-    }
-    inicializarPanelController() {
-        this.panelController = new PanelController();
     }
 
     inicializarMapa() {
@@ -41,10 +33,6 @@ class MapaInteractivo {
 
         L.control.scale({imperial: false}).addTo(this.mapa);
     }
-
-    inicializarDashboard() {
-    this.dashboard = new DashboardAnalisis(this);
-}
 
     configurarEventListeners() {
         document.addEventListener('change', (e) => {
@@ -127,25 +115,26 @@ class MapaInteractivo {
     async cargarResumenGeneral() {
         try {
             this.mostrarCargando('estadisticas-globales', 'Cargando estadisticas...');
-
+            
             const response = await fetch('/api/resumen/');
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-
+            
             const data = await response.json();
-
+            
             if (data.error) {
                 throw new Error(data.error);
             }
-
+            
             this.mostrarResumenGeneral(data);
         } catch (error) {
+            console.error('Error cargando resumen:', error);
             this.mostrarError('estadisticas-globales', 'No se pudieron cargar las estadisticas generales');
         }
     }
 
     mostrarResumenGeneral(data) {
         const contenedor = document.getElementById('estadisticas-globales');
-
+        
         let fechaReciente = 'N/A';
         if (data.fecha_reciente) {
             const fecha = new Date(data.fecha_reciente);
@@ -181,25 +170,26 @@ class MapaInteractivo {
 async cargarFiltrosDisponibles() {
     try {
         this.mostrarCargando('filtros-container', 'Cargando filtros...');
-
+        
         const response = await fetch('/api/filtros/');
         if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-
+        
         const data = await response.json();
-
+        
         if (data.error) {
             throw new Error(data.error);
         }
-
+        
         this.mostrarFiltros(data);
     } catch (error) {
+        console.error('Error cargando filtros:', error);
         this.mostrarError('filtros-container', 'No se pudieron cargar los filtros');
     }
 }
 
 mostrarFiltros(data) {
     const contenedor = document.getElementById('filtros-container');
-
+    
     // Corregir: eliminar años duplicados
     let opcionesAños = '<option value="">Todos los años</option>';
     if (data.años && data.años.length > 0) {
@@ -264,7 +254,7 @@ mostrarFiltros(data) {
 async actualizarProductosPorSubsector(subsectorNombre) {
     try {
         const selectProducto = document.getElementById('filtro-producto');
-
+        
         if (!subsectorNombre) {
             // Si no hay subsector, cargar todos los productos
             await this.cargarTodosLosProductos();
@@ -279,9 +269,9 @@ async actualizarProductosPorSubsector(subsectorNombre) {
         // Buscar productos del subsector seleccionado
         const response = await fetch('/api/filtros/');
         const filtrosData = await response.json();
-
+        
         let opciones = '<option value="">Todos los productos</option>';
-
+        
         if (filtrosData.productos && filtrosData.productos.length > 0) {
             // Filtrar productos por subsector
             const productosFiltrados = filtrosData.productos.filter(producto => {
@@ -289,18 +279,19 @@ async actualizarProductosPorSubsector(subsectorNombre) {
                 // Por ahora, cargamos todos los productos y el filtro se aplica después
                 return true;
             });
-
+            
             const productosOrdenados = productosFiltrados.sort((a, b) => a.nombre.localeCompare(b.nombre));
             productosOrdenados.forEach(producto => {
                 opciones += `<option value="${producto.nombre}">${producto.nombre}</option>`;
             });
         }
-
+        
         selectProducto.innerHTML = opciones;
         selectProducto.disabled = false;
         selectProducto.value = valorOriginal; // Mantener el valor seleccionado si existe
-
+        
     } catch (error) {
+        console.error('Error actualizando productos:', error);
         const selectProducto = document.getElementById('filtro-producto');
         selectProducto.innerHTML = '<option value="">Error cargando productos</option>';
         selectProducto.disabled = false;
@@ -316,7 +307,7 @@ async cargarTodosLosProductos() {
 
         const response = await fetch('/api/filtros/');
         const data = await response.json();
-
+        
         let opciones = '<option value="">Todos los productos</option>';
         if (data.productos && data.productos.length > 0) {
             const productosOrdenados = data.productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -324,11 +315,12 @@ async cargarTodosLosProductos() {
                 opciones += `<option value="${producto.nombre}">${producto.nombre}</option>`;
             });
         }
-
+        
         selectProducto.innerHTML = opciones;
         selectProducto.disabled = false;
-
+        
     } catch (error) {
+        console.error('Error cargando todos los productos:', error);
         const selectProducto = document.getElementById('filtro-producto');
         selectProducto.innerHTML = '<option value="">Error cargando productos</option>';
         selectProducto.disabled = false;
@@ -358,7 +350,7 @@ limpiarFiltros() {
     document.getElementById('filtro-año').value = '';
     this.filtros = { subsector: '', producto: '', año: '' };
     this.ocultarFiltrosActivos();
-
+    
     // VERIFICAR que hay una región seleccionada Y que el elemento existe
     if (this.regionSeleccionada && document.getElementById('lista-productos')) {
         this.cargarProductosRegion(this.regionSeleccionada);
@@ -419,7 +411,7 @@ ocultarFiltrosActivos() {
                 iconAnchor: [13, 13]
             });
 
-            const marcador = L.marker([region.lat, region.lng], {
+            const marcador = L.marker([region.lat, region.lng], { 
                 icon: iconoPersonalizado
             }).addTo(this.mapa);
 
@@ -467,29 +459,31 @@ ocultarFiltrosActivos() {
     async seleccionarRegion(regionId) {
         try {
             if (!this.marcadoresRegiones[regionId]) {
+                console.warn(`Region ${regionId} no esta en el mapa`);
                 return;
             }
 
             this.regionSeleccionada = regionId;
             this.mostrarCargando('info-region', 'Cargando informacion de la region...');
-
+            
             this.resaltarRegionSeleccionada(regionId);
-
+            
             const responseRegion = await fetch(`/api/region/${regionId}/`);
             if (!responseRegion.ok) {
                 throw new Error(`Error cargando region: ${responseRegion.status}`);
             }
-
+            
             const dataRegion = await responseRegion.json();
-
+            
             if (dataRegion.error) {
                 throw new Error(dataRegion.error);
             }
-
+            
             this.mostrarInfoRegion(dataRegion);
             this.cargarProductosRegion(regionId);
-
+            
         } catch (error) {
+            console.error('Error seleccionando region:', error);
             this.mostrarError('info-region', 'Error cargando la region seleccionada');
         }
     }
@@ -517,7 +511,7 @@ ocultarFiltrosActivos() {
 
 mostrarInfoRegion(data) {
     const contenedor = document.getElementById('info-region');
-
+    
     let subsectoresHTML = '';
     if (data.subsectores && data.subsectores.length > 0) {
         subsectoresHTML = data.subsectores.slice(0, 5).map(subsector => {
@@ -565,7 +559,7 @@ mostrarInfoRegion(data) {
             </div>
         </div>
     `;
-
+    
     // Cargar los productos inmediatamente después de crear el contenedor
     this.cargarProductosRegion(data.region_id);
 }
@@ -580,8 +574,9 @@ mostrarInfoRegion(data) {
             this.regionesAnalisis.add(regionId);
             this.actualizarListaAnalisis();
             this.mostrarMensaje(`Region "${regionNombre}" agregada al analisis`, 'success');
-
+            
         } catch (error) {
+            console.error('Error agregando region al analisis:', error);
             this.mostrarMensaje('Error agregando region al analisis', 'error');
         }
     }
@@ -591,8 +586,9 @@ mostrarInfoRegion(data) {
             this.regionesAnalisis.delete(regionId);
             this.actualizarListaAnalisis();
             this.mostrarMensaje('Region removida del analisis', 'info');
-
+            
         } catch (error) {
+            console.error('Error removiendo region del analisis:', error);
             this.mostrarMensaje('Error removiendo region del analisis', 'error');
         }
     }
@@ -638,25 +634,26 @@ async compararRegiones() {
         }
 
         this.mostrarCargando('info-region', 'Comparando regiones...');
-
+        
         // Construir URL con las regiones seleccionadas
         const regionesIds = Array.from(this.regionesAnalisis).join(',');
         const url = `/api/comparar-regiones/?regiones=${regionesIds}`;
-
+        
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
-
+        
         const data = await response.json();
-
+        
         if (data.error) {
             throw new Error(data.error);
         }
-
+        
         this.mostrarComparacionRegiones(data);
-
+        
     } catch (error) {
+        console.error('Error comparando regiones:', error);
         this.mostrarError('info-region', 'Error al comparar regiones');
     }
 }
@@ -664,7 +661,7 @@ async compararRegiones() {
 // AGREGAR esta nueva función para mostrar la comparación
 mostrarComparacionRegiones(data) {
     const contenedor = document.getElementById('info-region');
-
+    
     if (!data.regiones_comparadas || data.regiones_comparadas.length === 0) {
         contenedor.innerHTML = `
             <div class="error">
@@ -696,9 +693,9 @@ mostrarComparacionRegiones(data) {
 
     data.regiones_comparadas.forEach(region => {
         const estadisticas = region.estadisticas;
-        const precioPromedio = estadisticas.precio_promedio ?
+        const precioPromedio = estadisticas.precio_promedio ? 
             parseFloat(estadisticas.precio_promedio).toFixed(2) : 'N/A';
-        const volumenTotal = estadisticas.volumen_total ?
+        const volumenTotal = estadisticas.volumen_total ? 
             parseFloat(estadisticas.volumen_total).toLocaleString('es-CL') : '0';
 
         comparacionHTML += `
@@ -734,21 +731,21 @@ generarMetricasComparacion(regiones) {
 
     const precios = regiones.map(r => parseFloat(r.estadisticas.precio_promedio) || 0).filter(p => p > 0);
     const volumenes = regiones.map(r => parseFloat(r.estadisticas.volumen_total) || 0);
-
-    const regionMayorPrecio = precios.length > 0 ?
+    
+    const regionMayorPrecio = precios.length > 0 ? 
         regiones[precios.indexOf(Math.max(...precios))] : null;
-    const regionMenorPrecio = precios.length > 0 ?
+    const regionMenorPrecio = precios.length > 0 ? 
         regiones[precios.indexOf(Math.min(...precios))] : null;
-    const regionMayorVolumen = volumenes.length > 0 ?
+    const regionMayorVolumen = volumenes.length > 0 ? 
         regiones[volumenes.indexOf(Math.max(...volumenes))] : null;
 
     let metricasHTML = '';
 
     if (regionMayorPrecio && regionMenorPrecio) {
-        const diferenciaPrecio = ((parseFloat(regionMayorPrecio.estadisticas.precio_promedio) -
-                                 parseFloat(regionMenorPrecio.estadisticas.precio_promedio)) /
+        const diferenciaPrecio = ((parseFloat(regionMayorPrecio.estadisticas.precio_promedio) - 
+                                 parseFloat(regionMenorPrecio.estadisticas.precio_promedio)) / 
                                  parseFloat(regionMenorPrecio.estadisticas.precio_promedio) * 100).toFixed(1);
-
+        
         metricasHTML += `
             <div class="metrica-item">
                 <span class="metrica-label">Mayor precio promedio:</span>
@@ -781,8 +778,9 @@ generarMetricasComparacion(regiones) {
             this.regionesAnalisis.clear();
             this.actualizarListaAnalisis();
             this.mostrarMensaje('Analisis limpiado', 'info');
-
+            
         } catch (error) {
+            console.error('Error limpiando analisis:', error);
             this.mostrarMensaje('Error limpiando analisis', 'error');
         }
     }
@@ -790,47 +788,49 @@ generarMetricasComparacion(regiones) {
 async cargarProductosRegion(regionId) {
     try {
         const contenedor = document.getElementById('lista-productos');
-
+        
         // Si el contenedor no existe, no hacer nada
         if (!contenedor) {
             return;
         }
-
+        
         this.mostrarCargando('lista-productos', 'Cargando productos...');
-
+        
         const params = new URLSearchParams();
         if (this.filtros.subsector) params.append('subsector', this.filtros.subsector);
         if (this.filtros.producto) params.append('producto', this.filtros.producto);
         if (this.filtros.año) params.append('año', this.filtros.año);
-
+        
         const url = `/api/region/${regionId}/productos/?${params.toString()}`;
         const response = await fetch(url);
-
+        
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
-
+        
         const data = await response.json();
-
+        
         if (data.error) {
             throw new Error(data.error);
         }
-
+        
         this.mostrarProductosRegion(data);
-
+        
     } catch (error) {
+        console.error('Error cargando productos:', error);
         this.mostrarError('lista-productos', 'Error cargando productos');
     }
 }
 
 mostrarProductosRegion(data) {
     const contenedor = document.getElementById('lista-productos');
-
+    
     // VERIFICAR que el elemento existe antes de manipularlo
     if (!contenedor) {
+        console.error('Elemento #lista-productos no encontrado en el DOM');
         return;
     }
-
+    
     if (!data.productos || data.productos.length === 0) {
         contenedor.innerHTML = `
             <div class="sin-resultados">
@@ -842,11 +842,11 @@ mostrarProductosRegion(data) {
     }
 
     const productosHTML = data.productos.map(producto => {
-        const precioPromedio = producto.precio_promedio ?
+        const precioPromedio = producto.precio_promedio ? 
             parseFloat(producto.precio_promedio) : 0;
-        const volumenTotal = producto.volumen_total ?
+        const volumenTotal = producto.volumen_total ? 
             parseFloat(producto.volumen_total) : 0;
-
+        
         return `
             <div class="producto-item">
                 <div class="producto-header">
@@ -874,7 +874,7 @@ mostrarProductosRegion(data) {
     contenedor.innerHTML = `
         <div class="resultados-info">
             <p class="texto-pequeno">Mostrando ${data.total_resultados} productos</p>
-            ${data.filtros_aplicados && (data.filtros_aplicados.producto || data.filtros_aplicados.subsector || data.filtros_aplicados.año) ?
+            ${data.filtros_aplicados && (data.filtros_aplicados.producto || data.filtros_aplicados.subsector || data.filtros_aplicados.año) ? 
                 `<p class="texto-pequeno filtros-aplicados">Con filtros aplicados</p>` : ''
             }
         </div>
@@ -887,7 +887,9 @@ mostrarProductosRegion(data) {
 document.addEventListener('DOMContentLoaded', function() {
     try {
         window.app = new MapaInteractivo();
+        console.log('Mapa interactivo inicializado correctamente');
     } catch (error) {
+        console.error('Error inicializando el mapa interactivo:', error);
         const errorElement = document.createElement('div');
         errorElement.style.cssText = `
             position: fixed;

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'mapaInteractivo/css/prediccion.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="pred-container">
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Predicción de Precios</h2>
+        </div>
+
+        <div class="card-body">
+
+            {% if error %}
+            <div class="alert-error">
+                ⚠️ {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'prediccion_home' %}">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Producto:</label>
+                        {{ form.fruta }}
+                        {% if form.fruta.errors %}
+                        <div class="error-text">{{ form.fruta.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label>Categoría / Unidad:</label>
+                        {{ form.categoria }}
+                        {% if form.categoria.errors %}
+                        <div class="error-text">{{ form.categoria.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>Región:</label>
+                        {{ form.region }}
+                        {% if form.region.errors %}
+                        <div class="error-text">{{ form.region.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label>Horizonte:</label>
+                        {{ form.horizonte }}
+                        {% if form.horizonte.errors %}
+                        <div class="error-text">{{ form.horizonte.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="center">
+                    <button type="submit" class="btn-pred">Generar Predicción</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Información extra -->
+    <div class="card info">
+        <div class="card-body">
+            <h3>💡 ¿Cómo funciona?</h3>
+
+            <ul class="info-list">
+                <li>✔ Selecciona un producto, categoría y región.</li>
+                <li>✔ Elige el horizonte de predicción.</li>
+                <li>✔ Predicciones basadas en datos históricos de ODEPA.</li>
+                <li>✔ La predicción comienza desde el próximo ciclo ODEPA.</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

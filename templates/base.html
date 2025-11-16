@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroPrecios CL</title>
+
+    <!-- Tu CSS general -->
+    <link rel="stylesheet" href="{% static 'mapaInteractivo/css/base.css' %}">
+
+    {% block extra_styles %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- Header con borde y botones -->
+    <header id="header" class="header-border">
+        <a href="{% url 'mapa_interactivo' %}" class="logo-link">
+            <img src="{% static 'mapaInteractivo/img/logo.png' %}" alt="AgroPrecios CL" class="logo-img">
+        </a>
+
+
+        <nav class="nav-buttons">
+            <a href="{% url 'mapa_interactivo' %}" class="nav-btn">Mapa Interactivo</a>
+            <a href="{% url 'prediccion_home' %}" class="nav-btn">Predicciones</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
