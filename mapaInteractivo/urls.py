@@ -24,4 +24,6 @@ urlpatterns = [
     #API Del dashboard
     path('api/dashboard-analisis/', views.dashboard_analisis, name='dashboard_analisis'),
 
+path('api/exportar-pdf/', views.exportar_dashboard_pdf, name='exportar_pdf'),
+path('api/exportar-excel/', views.exportar_dashboard_excel, name='exportar_excel'),
 ]

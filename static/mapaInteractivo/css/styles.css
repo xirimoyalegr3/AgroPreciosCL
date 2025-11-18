@@ -47,7 +47,7 @@ body {
 }
 
 #resumen-general h2 {
-    color: #2c5aa0;
+    color: #2e7d32;
     margin-bottom: 15px;
     font-size: 1.4em;
     border-bottom: 2px solid #e9ecef;
@@ -64,7 +64,7 @@ body {
 
 .estadistica-valor {
     font-weight: bold;
-    color: #2c5aa0;
+    color: #2e7d32;
 }
 
 /* Filtros */
@@ -105,7 +105,7 @@ body {
 
 .filtro-select:focus {
     outline: none;
-    border-color: #2c5aa0;
+    border-color: #2e7d32;
     box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2);
 }
 
@@ -134,7 +134,7 @@ body {
 }
 
 .btn-primario {
-    background: #2c5aa0;
+    background: #2e7d32;
     color: white;
 }
 
@@ -164,7 +164,7 @@ body {
     border: 1px solid #b3d9ff;
     border-radius: 6px;
     font-size: 12px;
-    color: #2c5aa0;
+    color: #2e7d32;
 }
 
 .filtros-activos strong {
@@ -240,7 +240,7 @@ body {
 }
 
 .region-header h3 {
-    color: #2c5aa0;
+    color: #2e7d32;
     margin-bottom: 15px;
     font-size: 1.3em;
 }
@@ -264,7 +264,7 @@ body {
     display: block;
     font-size: 1.3em;
     font-weight: bold;
-    color: #2c5aa0;
+    color: #2e7d32;
 }
 
 .stat-label {
@@ -280,7 +280,7 @@ body {
 }
 
 .btn-agregar-analisis-region {
-    background: #28a745;
+    background: #2850a7;
     color: white;
     border: none;
     padding: 10px 16px;
@@ -362,7 +362,7 @@ body {
 }
 
 .producto-nombre {
-    color: #2c5aa0;
+    color: #2e7d32;
     font-weight: 500;
     flex: 1;
 }
@@ -397,7 +397,7 @@ body {
 }
 
 .producto-stat strong {
-    color: #2c5aa0;
+    color: #2e7d32;
     font-size: 0.9em;
 }
 
@@ -431,7 +431,7 @@ body {
 }
 
 .filtros-aplicados {
-    color: #2c5aa0 !important;
+    color: #2e7d32 !important;
     font-weight: 500;
 }
 
@@ -457,7 +457,7 @@ body {
 
 .popup-region h4 {
     margin-bottom: 12px;
-    color: #2c5aa0;
+    color: #2e7d32;
     font-size: 1.1em;
 }
 
@@ -474,7 +474,7 @@ body {
 }
 
 .btn-ver-detalles {
-    background: #2c5aa0;
+    background: #2770b8;
     color: white;
 }
 
@@ -606,7 +606,7 @@ body {
 }
 
 .comparacion-header h3 {
-    color: #2c5aa0;
+    color: #2e7d32;
     margin-bottom: 5px;
 }
 
@@ -677,7 +677,7 @@ body {
 
 .metrica-valor {
     font-weight: 600;
-    color: #2c5aa0;
+    color: #2054bb;
 }
 
 .metrica-valor.positivo {
@@ -741,7 +741,7 @@ body {
 
 /* Indicador visual de que es arrastrable - Se mantiene el borde en hover */
 #panel-lateral:hover {
-    border-right-color: #2c5aa0;
+    border-right-color: #2e7d32;
 }
 
 /* Eliminado el pseudo-elemento ::after (Handle sutil) ya que se usa .panel-drag-handle */
@@ -826,13 +826,13 @@ body {
 }
 
 .icono-panel:hover {
-    background: #2c5aa0;
+    background: #2e7d32;
     color: white;
     transform: scale(1.1);
 }
 
 .icono-panel.active {
-    background: #2c5aa0;
+    background: #2e7d32;
     color: white;
 }
 
@@ -847,7 +847,7 @@ body {
 .btn-expand-panel {
     width: 30px;
     height: 30px;
-    background: #2c5aa0;
+    background: #2e7d32;
     color: white;
     border: none;
     border-radius: 50%;
@@ -873,7 +873,7 @@ body {
     transform: translateY(-50%);
     width: 20px;
     height: 120px;
-    background: #2c5aa0;
+    background: #2e7d32;
     color: white;
     display: flex !important;
     align-items: center;
@@ -940,7 +940,7 @@ body {
 }
 
 #resumen-general h2 {
-    color: #2c5aa0;
+    color: #2e7d32;
     margin-bottom: 15px;
     font-size: 1.4em;
     border-bottom: 2px solid #e9ecef;
@@ -958,7 +958,7 @@ body {
 
 .estadistica-valor {
     font-weight: bold;
-    color: #2c5aa0;
+    color: #2e7d32;
 }
 
 /* Filtros */
@@ -971,7 +971,7 @@ body {
 }
 
 #filtros-container h3 {
-    color: #495057;
+    color: #2e7d32;
     margin-bottom: 15px;
     font-size: 1.2em;
 }
@@ -999,7 +999,7 @@ body {
 
 .filtro-select:focus {
     outline: none;
-    border-color: #2c5aa0;
+    border-color: #2e7d32;
     box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2);
 }
 
@@ -1028,7 +1028,7 @@ body {
 }
 
 .btn-primario {
-    background: #2c5aa0;
+    background: #2e7d32;
     color: white;
 }
 
@@ -1058,7 +1058,7 @@ body {
     border: 1px solid #b3d9ff;
     border-radius: 6px;
     font-size: 12px;
-    color: #2c5aa0;
+    color: #2e7d32;
 }
 
 .filtros-activos strong {
@@ -1134,7 +1134,7 @@ body {
 }
 
 .region-header h3 {
-    color: #2c5aa0;
+    color: #2e7d32;
     margin-bottom: 15px;
     font-size: 1.3em;
 }
@@ -1158,7 +1158,7 @@ body {
     display: block;
     font-size: 1.3em;
     font-weight: bold;
-    color: #2c5aa0;
+    color: #2e7d32;
 }
 
 .stat-label {
@@ -1305,7 +1305,7 @@ body {
     align-items: center;
     padding: 20px;
     border-bottom: 2px solid #e9ecef;
-    background: #2c5aa0;
+    background: #2e7d32;
     color: white;
     border-radius: 12px 12px 0 0;
 }
@@ -1363,7 +1363,7 @@ body {
 }
 
 .dashboard-section h3 {
-    color: #2c5aa0;
+    color: #2e7d32;
     margin-bottom: 15px;
     border-bottom: 1px solid #dee2e6;
     padding-bottom: 8px;
@@ -1388,7 +1388,7 @@ body {
 .metrica-valor {
     font-size: 1.8em;
     font-weight: bold;
-    color: #2c5aa0;
+    color: #2e7d32;
     display: block;
 }
 
@@ -1529,7 +1529,7 @@ body {
 }
 
 .tabla-analisis th {
-    background: #2c5aa0;
+    background: #2e7d32;
     color: white;
     font-weight: 600;
     font-size: 0.9em;
@@ -1569,7 +1569,7 @@ body {
 .metrica-valor {
     font-size: 2em;
     font-weight: bold;
-    color: #2c5aa0;
+    color: #2e7d32;
     display: block;
     margin-bottom: 5px;
 }
@@ -1656,3 +1656,174 @@ body {
     font-size: 0.75em;
     font-weight: 600;
 }
+/* ============================================================
+   ==== CORRECCIONES DE ESTILOS ====
+   ============================================================ */
+
+/* 1. Reducir tamaño de texto en resumen-comparacion */
+.resumen-comparacion h4 {
+    font-size: 1em !important;
+    margin-bottom: 12px !important;
+}
+
+.metrica-item {
+    font-size: 0.85em !important;
+}
+
+.metrica-label {
+    font-size: 0.9em !important;
+}
+
+.metrica-valor {
+    font-size: 0.9em !important;
+}
+
+/* 2. Hacer el panel lateral más ancho */
+#panel-lateral {
+    width: 450px !important; /* Aumentado de 400px */
+    min-width: 450px !important;
+}
+
+/* Ajustar el drag handle para el nuevo ancho */
+.panel-drag-handle {
+    left: 450px !important; /* Ajustado al nuevo width */
+}
+
+.panel-drag-handle:hover {
+    left: 445px !important; /* Ajuste para hover */
+}
+
+/* 3. Ajustar el mapa para el panel más ancho */
+#mapa-container {
+    flex: 1;
+    margin-left: 0; /* Asegurar que use todo el espacio disponible */
+}
+
+/* 4. Mejorar responsive para el nuevo ancho */
+@media (max-width: 1024px) {
+    #panel-lateral {
+        width: 400px !important;
+        min-width: 400px !important;
+    }
+    
+    .panel-drag-handle {
+        left: 400px !important;
+    }
+    
+    .panel-drag-handle:hover {
+        left: 395px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #panel-lateral {
+        width: 100% !important;
+        min-width: 100% !important;
+        position: fixed;
+        height: 50vh;
+    }
+    
+    #mapa-container {
+        height: 50vh;
+        margin-top: 50vh;
+    }
+    
+    .panel-drag-handle {
+        display: none !important; /* Ocultar en móvil */
+    }
+}
+
+/* 5. Ajustar contenido interno del panel para el nuevo ancho */
+#resumen-general,
+#filtros-container,
+#info-region,
+.panel-analisis {
+    padding: 15px !important;
+}
+
+/* 6. Mejorar legibilidad en comparaciones */
+.tabla-comparacion {
+    font-size: 0.8em !important;
+}
+
+.tabla-comparacion th,
+.tabla-comparacion td {
+    padding: 8px 6px !important;
+}
+
+/* 7. Ajustar botones para nuevo ancho */
+.botones-filtros,
+.botones-analisis {
+    gap: 8px !important;
+}
+
+.btn-filtro {
+    font-size: 13px !important;
+    padding: 8px !important;
+}
+
+/* 8. Mejorar productos list para nuevo ancho */
+.productos-list {
+    max-height: 350px !important;
+}
+
+.producto-item {
+    padding: 10px !important;
+}
+
+.producto-header {
+    gap: 8px !important;
+}
+
+.producto-stats {
+    gap: 4px !important;
+    font-size: 0.8em !important;
+}
+#panel-lateral {
+    width: 550px !important;
+    min-width: 550px !important;
+}
+
+.panel-drag-handle {
+    left: 550px !important;
+}
+
+.panel-drag-handle:hover {
+    left: 545px !important;
+}
+/* Botón flotante para dashboard con imagen de estadísticas */
+.btn-dashboard-flotante {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    transition: all 0.3s ease;
+    /* Imagen SVG de gráfico de barras */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='20' x2='12' y2='10'%3E%3C/line%3E%3Cline x1='18' y1='20' x2='18' y2='4'%3E%3C/line%3E%3Cline x1='6' y1='20' x2='6' y2='16'%3E%3C/line%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 32px 32px;
+}
+
+.btn-dashboard-flotante:hover {
+    background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+}
+
+.btn-dashboard-flotante:active {
+    transform: scale(0.95);
+}
+

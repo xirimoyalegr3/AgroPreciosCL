@@ -25,9 +25,17 @@ class MapaInteractivo {
                 this.inicializarDashboard();  
 
     }
-        inicializarDashboard() {
-        this.dashboard = new DashboardAnalisis(this);
+inicializarDashboard() {
+    if (typeof DashboardAnalisis !== 'undefined') {
+        try {
+            this.dashboard = new DashboardAnalisis(this);
+            window.dashboard = this.dashboard; // Hacerlo global
+            console.log('Dashboard inicializado correctamente');
+        } catch (error) {
+            console.error('Error inicializando dashboard:', error);
+        }
     }
+}
 
     inicializarMapa() {
         this.mapa = L.map('mapa').setView([-35.6751, -71.5430], 5);
@@ -55,6 +63,7 @@ class MapaInteractivo {
             panelAnalisis.id = 'panel-analisis';
             panelAnalisis.className = 'panel-analisis';
             panelAnalisis.innerHTML = `
+            <br>
                 <h3>Analisis Multi-Region</h3>
                 <div id="lista-regiones-analisis" class="lista-regiones-analisis">
                     <p class="sin-region-seleccionada">No hay regiones seleccionadas para analisis</p>
@@ -63,6 +72,10 @@ class MapaInteractivo {
                     <button id="comparar-regiones" class="btn-filtro btn-primario" disabled>Comparar Regiones</button>
                     <button id="limpiar-analisis" class="btn-filtro btn-secundario">Limpiar Analisis</button>
                 </div>
+                <br>
+                
+                <br>
+            <br>
             `;
             document.getElementById('panel-lateral').appendChild(panelAnalisis);
 

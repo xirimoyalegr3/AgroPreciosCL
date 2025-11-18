@@ -338,14 +338,26 @@ class DashboardAnalisis {
 
             <!-- BOTONES DE EXPORTACIÓN -->
             <div class="botones-exportacion">
-                <button class="btn-exportar btn-exportar-pdf" onclick="dashboard.exportarPDF()">
-                     Exportar a PDF
-                </button>
-                <button class="btn-exportar btn-exportar-excel" onclick="dashboard.exportarExcel()">
-                     Exportar a Excel
-                </button>
+               <button class="btn-exportar btn-exportar-pdf" onclick="window.dashboard.exportarPDF()">
+        Exportar a PDF
+    </button>
+    <button class="btn-exportar btn-exportar-excel" onclick="window.dashboard.exportarExcel()">
+        Exportar a Excel
+    </button>
             </div>
         `;
+        // En mostrarDashboard(), después de crear el HTML:
+setTimeout(() => {
+    const btnPdf = document.querySelector('.btn-exportar-pdf');
+    const btnExcel = document.querySelector('.btn-exportar-excel');
+    
+    if (btnPdf) {
+        btnPdf.addEventListener('click', () => this.exportarPDF());
+    }
+    if (btnExcel) {
+        btnExcel.addEventListener('click', () => this.exportarExcel());
+    }
+}, 100);
     }
 
     generarMetricasPrincipales() {
@@ -552,13 +564,48 @@ class DashboardAnalisis {
         `;
     }
 
-    exportarPDF() {
-        this.mostrarMensaje(' Función de exportación PDF en desarrollo', 'info');
+exportarPDF() {
+    try {
+        this.mostrarMensaje('Generando reporte PDF...', 'info');
+        
+        // Usar window para acceder a la función globalmente
+        const link = document.createElement('a');
+        link.href = '/api/exportar-pdf/';
+        link.download = 'reporte_analisis_agroprecios.pdf';
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        this.mostrarMensaje('Reporte PDF generado correctamente', 'success');
+        
+    } catch (error) {
+        console.error('Error exportando a PDF:', error);
+        this.mostrarMensaje('Error al generar el PDF', 'error');
     }
+}
 
-    exportarExcel() {
-        this.mostrarMensaje(' Función de exportación Excel en desarrollo', 'info');
+exportarExcel() {
+    try {
+        this.mostrarMensaje('Generando reporte Excel...', 'info');
+        
+        const link = document.createElement('a');
+        link.href = '/api/exportar-excel/';
+        link.download = 'reporte_analisis_agroprecios.xlsx';
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        this.mostrarMensaje('Reporte Excel generado correctamente', 'success');
+        
+    } catch (error) {
+        console.error('Error exportando a Excel:', error);
+        this.mostrarMensaje('Error al generar el Excel', 'error');
     }
+}
 
     mostrarMensaje(mensaje, tipo = 'info') {
         if (this.app && this.app.mostrarMensaje) {
