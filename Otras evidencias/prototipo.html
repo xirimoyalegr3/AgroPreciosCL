@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Agro Precios Chile</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #2c3e50; color: #333; }
+
+    /* Header fijo */
+    header {
+      position: fixed;
+      top: 0; left: 0; width: 100%;
+      background: #1a252f;
+      color: #fff;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+    }
+    header h1 { font-size: 1.2rem; }
+    nav a { color: #fff; margin-left: 1rem; text-decoration: none; font-weight: bold; }
+    nav a:hover { text-decoration: underline; }
+
+    /* Fondo con mapa */
+    #map-container {
+      width: 100%;
+      min-height: 100vh;
+      margin-top: 70px;
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+    }
+    #map {
+      width: 100%;
+      display: block;
+      transform-origin: 50% 10%;
+      transition: transform 0.18s ease;
+      cursor: grab;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Caja flotante */
+    .card {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      backdrop-filter: blur(8px);
+      cursor: grab;
+    }
+    .card:active { cursor: grabbing; }
+
+    /* Posiciones iniciales */
+    .filters { top: 120px; left: 20px; width: 260px; }
+    .kpis { top: 120px; right: 20px; width: 260px; }
+    .results { top: 500px; left: 20px; width: 500px; }
+    .chartbox { top: 500px; right: 20px; width: 400px; height: 250px; }
+
+    /* Estilos internos */
+    .filters h2 { margin-bottom: 0.5rem; font-size: 1.1rem; }
+    .filters label { margin-top: 0.6rem; font-size: 0.9rem; display: block; }
+    .filters select, .filters input, .filters button {
+      width: 100%; margin-top: 0.2rem; padding: 0.5rem;
+      border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem;
+    }
+    .filters button {
+      background: #27ae60; color: #fff; font-weight: bold;
+      margin-top: 1rem; border: none; cursor: pointer;
+    }
+    .kpi { text-align: center; background: #3498db; color: #fff; padding: 1rem; border-radius: 10px; margin-bottom: 0.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: center; }
+    th { background: #f0f0f0; }
+
+    /* Controles de zoom */
+    #zoom-controls {
+      position: fixed;
+      left: 20px;
+      bottom: 20px;
+      z-index: 2000;
+      display: flex;
+      gap: 8px;
+    }
+    #zoom-controls button {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      background: #1a252f;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    #zoom-controls button:hover { background: #34495e; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Agro Precios Chile</h1>
+    <nav>
+      <a href="#">Inicio</a>
+      <a href="#">Simulación</a>
+      <a href="#">Análisis</a>
+    </nav>
+  </header>
+
+  <div id="map-container">
+    <!-- Mapa de Chile desde Wikimedia -->
+    <img id="map" src="https://commons.wikimedia.org/wiki/Special:FilePath/Mapa_de_Chile.svg" alt="Mapa de Chile">
+
+    <!-- Caja de filtros -->
+    <div class="card filters">
+      <h2>Filtros</h2>
+      <label>Fecha:</label>
+      <input type="date">
+      <label>Región:</label>
+      <select><option>Metropolitana</option><option>Biobío</option><option>Valparaíso</option></select>
+      <label>Mercado:</label>
+      <select><option>La Vega</option><option>Lo Valledor</option><option>Concepción</option></select>
+      <label>Subsector:</label>
+      <select><option>Frutas</option><option>Hortalizas</option></select>
+      <label>Producto:</label>
+      <select><option>Tomate</option><option>Manzana</option><option>Papa</option></select>
+      <label>Variedad / Tipo:</label>
+      <input type="text" placeholder="Ej: Cherry, Fuji...">
+      <label>Calidad:</label>
+      <select><option>Primera</option><option>Segunda</option></select>
+      <label>Unidad:</label>
+      <select><option>Kilo</option><option>Cajón</option></select>
+      <label>Origen:</label>
+      <input type="text" placeholder="Ej: O'Higgins">
+      <button>Aplicar filtros</button>
+    </div>
+
+    <!-- Caja de KPIs -->
+    <div class="card kpis">
+      <div class="kpi"><h3>Mayor variación</h3><p>Tomate (+15%)</p></div>
+      <div class="kpi"><h3>Región más cara</h3><p>Metropolitana</p></div>
+      <div class="kpi"><h3>Mercado top</h3><p>Lo Valledor</p></div>
+    </div>
+
+    <!-- Tabla resultados -->
+    <div class="card results">
+      <h3>Resultados</h3>
+      <table>
+        <thead>
+          <tr><th>Producto</th><th>Variedad</th><th>Calidad</th><th>Volumen</th><th>Min</th><th>Max</th><th>Promedio</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Tomate</td><td>Cherry</td><td>Primera</td><td>1200 kg</td><td>$800</td><td>$1200</td><td>$1000</td></tr>
+          <tr><td>Manzana</td><td>Fuji</td><td>Primera</td><td>850 kg</td><td>$600</td><td>$950</td><td>$800</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Gráfico -->
+    <div class="card chartbox">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+
+  <!-- Controles de zoom -->
+  <div id="zoom-controls">
+    <button id="zoom-in">🔍+</button>
+    <button id="zoom-out">🔍−</button>
+    <button id="zoom-reset">⤾</button>
+  </div>
+
+  <script>
+    // --- Draggable de las cajas ---
+    function makeDraggable(card) {
+      let offsetX, offsetY, isDragging = false;
+
+      card.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - card.offsetLeft;
+        offsetY = e.clientY - card.offsetTop;
+        card.style.zIndex = 999;
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        card.style.left = (e.pageX - offsetX) + 'px';
+        card.style.top = (e.pageY - offsetY) + 'px';
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (isDragging) isDragging = false;
+        card.style.zIndex = 1;
+      });
+
+      card.ondragstart = () => false;
+    }
+
+    document.querySelectorAll('.card').forEach(makeDraggable);
+
+    // --- Draggable y Zoom del mapa ---
+    const mapEl = document.getElementById('map');
+    let mapOffsetX = 0, mapOffsetY = 0;
+    let isMapDragging = false;
+    let startX, startY;
+    let scale = 1;
+    const STEP = 0.15, MIN = 0.5, MAX = 4;
+
+    // Recuperar posición guardada
+    if(localStorage.getItem('mapPosX')) {
+      mapOffsetX = parseFloat(localStorage.getItem('mapPosX'));
+      mapOffsetY = parseFloat(localStorage.getItem('mapPosY'));
+    }
+
+    function updateMapPosition() {
+      mapEl.style.transform = `translate(${mapOffsetX}px, ${mapOffsetY}px) scale(${scale})`;
+    }
+    updateMapPosition();
+
+    mapEl.addEventListener('mousedown', (e) => {
+      isMapDragging = true;
+      startX = e.clientX - mapOffsetX;
+      startY = e.clientY - mapOffsetY;
+      mapEl.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isMapDragging) return;
+      mapOffsetX = e.clientX - startX;
+      mapOffsetY = e.clientY - startY;
+      updateMapPosition();
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isMapDragging) {
+        isMapDragging = false;
+        mapEl.style.cursor = 'grab';
+        // Guardar posición
+        localStorage.setItem('mapPosX', mapOffsetX);
+        localStorage.setItem('mapPosY', mapOffsetY);
+      }
+    });
+
+    mapEl.ondragstart = () => false;
+
+    // --- Zoom del mapa ---
+    document.getElementById('zoom-in').addEventListener('click', () => {
+      scale = Math.min(MAX, +(scale + STEP).toFixed(2));
+      updateMapPosition();
+    });
+    document.getElementById('zoom-out').addEventListener('click', () => {
+      scale = Math.max(MIN, +(scale - STEP).toFixed(2));
+      updateMapPosition();
+    });
+    document.getElementById('zoom-reset').addEventListener('click', () => {
+      scale = 1;
+      updateMapPosition();
+    });
+
+    // --- Gráfico demo ---
+    const ctx = document.getElementById('chart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ["Enero", "Febrero", "Marzo", "Abril", "Mayo"],
+        datasets: [{
+          label: 'Precio Promedio Tomate',
+          data: [800, 900, 1000, 950, 1100],
+          borderColor: 'red',
+          backgroundColor: 'rgba(255,0,0,0.2)',
+          fill: true
+        }]
+      }
+    });
+  </script>
+</body>
+</html>
