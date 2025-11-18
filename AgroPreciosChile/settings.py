@@ -85,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'frutas_hortalizas_db',
         'USER': 'postgres',
-        'PASSWORD': 'SighNither', #1234, SighNither
+        'PASSWORD': 'DESAM2710', #1234, SighNither
         'HOST': 'localhost',
         'PORT': '5432',
     }

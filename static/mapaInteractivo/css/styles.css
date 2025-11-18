@@ -705,3 +705,954 @@ body {
         gap: 5px;
     }
 }
+
+/* static/mapaInteractivo/css/styles.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden; /* Mantiene la barra de desplazamiento principal oculta */
+    background-color: #f5f5f5;
+}
+
+#contenedor-principal {
+    display: flex;
+    height: 100vh;
+}
+
+/* --- ESTILOS BASE DEL PANEL LATERAL Y MEJORAS DE LEGIBILIDAD --- */
+#panel-lateral {
+    position: relative;
+    width: 400px;
+    min-width: 400px;
+    max-width: 800px;
+    transition: all 0.3s ease; /* Transición para ancho y estado */
+    overflow-y: auto; /* Permite el desplazamiento del contenido si desborda */
+    scroll-behavior: smooth;
+    font-size: 14px;
+    line-height: 1.5;
+    background-color: #f5f5f5; /* Color de fondo para que se vea el contenido */
+    padding: 20px; /* Padding base para el contenido */
+}
+
+/* Indicador visual de que es arrastrable - Se mantiene el borde en hover */
+#panel-lateral:hover {
+    border-right-color: #2c5aa0;
+}
+
+/* Eliminado el pseudo-elemento ::after (Handle sutil) ya que se usa .panel-drag-handle */
+
+/* Cuando el panel no está siendo interactuado, mantener un ancho mínimo mayor */
+/* Eliminado el :not(:hover) min-width para evitar conflictos con el base de 400px */
+
+/* --- AJUSTES AUTOMÁTICOS DE TEXTO SEGÚN ANCHO --- */
+@media (min-width: 500px) {
+    /* Los estilos de #panel-lateral base ya están en 14px, 1.5. Estos se mantienen si se requiere sobreescribir */
+}
+
+@media (min-width: 600px) {
+    #panel-lateral {
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .estadistica-item {
+        font-size: 1em; /* Mantenido, pero ya está definido como 0.95em */
+    }
+
+    .producto-item {
+        font-size: 0.95em; /* Mantenido, pero ya está definido como 0.9em */
+    }
+}
+
+/* --- ESTADOS DEL PANEL LATERAL CORREGIDOS --- */
+
+/* Panel Contraído (Ancho Fijo) */
+#panel-lateral.panel-contraido {
+    width: 60px !important;
+    min-width: 60px !important;
+    overflow-x: hidden; /* Oculta el contenido horizontalmente */
+    padding: 0; /* Eliminar padding para que los íconos se ajusten al centro */
+}
+
+/* Panel Expandido (Ancho Mayor) */
+#panel-lateral.panel-expandido {
+    width: 600px !important;
+    font-size: 16px; /* Aumentar fuente para una mejor legibilidad en expandido */
+    line-height: 1.7;
+}
+
+/* Ocultar contenido en estado contraído */
+.panel-contraido #resumen-general,
+.panel-contraido #filtros-container,
+.panel-contraido #info-region,
+.panel-contraido .panel-analisis {
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* ICONOS DE ESTADO CONTRAÍDO */
+.panel-iconos {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    gap: 25px;
+}
+
+.panel-contraido .panel-iconos {
+    display: flex;
+}
+
+.icono-panel {
+    width: 40px;
+    height: 40px;
+    background: #e9ecef;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 18px;
+}
+
+.icono-panel:hover {
+    background: #2c5aa0;
+    color: white;
+    transform: scale(1.1);
+}
+
+.icono-panel.active {
+    background: #2c5aa0;
+    color: white;
+}
+
+/* CONTROLES DE EXPANSIÓN DEL PANEL LATERAL */
+.panel-controls {
+    position: absolute;
+    top: 10px;
+    right: -15px;
+    z-index: 1001;
+}
+
+.btn-expand-panel {
+    width: 30px;
+    height: 30px;
+    background: #2c5aa0;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-expand-panel:hover {
+    background: #1e3d6f;
+    transform: scale(1.1);
+}
+
+/* DRAG HANDLE (Arrastrable) */
+.panel-drag-handle {
+    position: fixed;
+    top: 50%;
+    left: 400px; /* Ajustado al width base de #panel-lateral */
+    transform: translateY(-50%);
+    width: 20px;
+    height: 120px;
+    background: #2c5aa0;
+    color: white;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    cursor: col-resize;
+    border-radius: 0 10px 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 10000;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+    box-shadow: 3px 0 8px rgba(0,0,0,0.3);
+    border: 2px solid white;
+}
+
+.panel-drag-handle:hover {
+    opacity: 1;
+    width: 25px;
+    background: #1e3d6f;
+    left: 395px; /* Ajuste para el cambio de ancho en hover (400 - 5) */
+}
+
+.panel-drag-handle::after {
+    content: 'Arrastrar';
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.panel-drag-handle:hover::after {
+    opacity: 1;
+}
+
+/* --- CONTENEDOR DE MAPA --- */
+#mapa-container {
+    flex: 1;
+    height: 100vh;
+    position: relative;
+}
+
+#mapa {
+    width: 100%;
+    height: 100%;
+}
+
+/* --- ESTILOS DE COMPONENTES DEL PANEL (Resumen, Filtros, Info) --- */
+
+/* Resumen General */
+#resumen-general {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#resumen-general h2 {
+    color: #2c5aa0;
+    margin-bottom: 15px;
+    font-size: 1.4em;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+.estadistica-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f3f4;
+    font-size: 0.95em; /* Aplicado aquí para consistencia */
+}
+
+.estadistica-valor {
+    font-weight: bold;
+    color: #2c5aa0;
+}
+
+/* Filtros */
+#filtros-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#filtros-container h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.filtro-grupo {
+    margin-bottom: 15px;
+}
+
+.filtro-grupo label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.filtro-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: white;
+    transition: all 0.2s ease;
+}
+
+.filtro-select:focus {
+    outline: none;
+    border-color: #2c5aa0;
+    box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2);
+}
+
+.filtro-select:disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.botones-filtros {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-filtro {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.btn-primario {
+    background: #2c5aa0;
+    color: white;
+}
+
+.btn-primario:hover:not(:disabled) {
+    background: #1e3d6f;
+}
+
+.btn-primario:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-secundario {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secundario:hover {
+    background: #545b62;
+}
+
+.filtros-activos {
+    margin-top: 15px;
+    padding: 12px;
+    background: #e7f3ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #2c5aa0;
+}
+
+.filtros-activos strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Panel de Analisis Multi-Region */
+.panel-analisis {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.panel-analisis h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+.lista-regiones-analisis {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.region-analisis-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.region-analisis-item span {
+    font-weight: 500;
+    color: #495057;
+}
+
+.btn-remover-analisis {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-remover-analisis:hover {
+    background: #c82333;
+}
+
+.botones-analisis {
+    display: flex;
+    gap: 10px;
+}
+
+/* Informacion de Region */
+#info-region {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.region-header h3 {
+    color: #2c5aa0;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.region-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    gap: 10px;
+}
+
+.stat-item {
+    text-align: center;
+    flex: 1;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #2c5aa0;
+}
+
+.stat-label {
+    font-size: 0.75em;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* OTRAS CLASES DE TEXTO */
+.producto-item {
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.tabla-analisis {
+    font-size: 0.85em;
+}
+
+/* --- MEJORAS RESPONSIVAS --- */
+@media (max-width: 1200px) {
+    #panel-lateral.panel-expandido {
+        width: 500px !important;
+    }
+
+    #panel-lateral {
+        max-width: 500px;
+    }
+}
+
+@media (max-width: 768px) {
+    #panel-lateral {
+        position: fixed;
+        height: 100vh;
+        z-index: 999;
+        max-width: 100%; /* Asegura que no sobrepase el ancho de la pantalla */
+    }
+
+    #panel-lateral.panel-expandido {
+        width: 100% !important;
+        max-width: 100%;
+    }
+}
+
+/* BOTÓN FLOTANTE PARA DASHBOARD */
+.btn-dashboard-flotante {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+.btn-dashboard-flotante:hover {
+    background: #218838;
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.btn-dashboard-flotante:active {
+    transform: scale(0.95);
+}
+
+/* Tooltip para el botón flotante */
+.btn-dashboard-flotante::after {
+    content: "Dashboard de Análisis";
+    position: absolute;
+    right: 70px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.btn-dashboard-flotante:hover::after {
+    opacity: 1;
+}
+/* ESTILOS PARA EL DASHBOARD DE ANÁLISIS */
+.btn-dashboard {
+    width: 100%;
+    padding: 12px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.3s ease;
+}
+
+.btn-dashboard:hover {
+    background: #218838;
+}
+
+/* OVERLAY Y CONTENEDOR DEL DASHBOARD */
+.dashboard-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    display: none;
+}
+
+.dashboard-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 85%;
+    background: white;
+    border-radius: 12px;
+    z-index: 10001;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 2px solid #e9ecef;
+    background: #2c5aa0;
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+    color: white;
+}
+
+.dashboard-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-dashboard-control {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-dashboard-control:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.dashboard-content {
+    padding: 20px;
+    height: calc(100% - 80px);
+    overflow-y: auto;
+}
+
+/* ESTADOS DEL DASHBOARD */
+.dashboard-minimized {
+    height: 60px;
+    width: 300px;
+    top: 20px;
+    left: 20px;
+    transform: none;
+}
+
+.dashboard-minimized .dashboard-content {
+    display: none;
+}
+
+/* SECCIONES DEL DASHBOARD */
+.dashboard-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.dashboard-section h3 {
+    color: #2c5aa0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 8px;
+}
+
+/* GRID DE MÉTRICAS */
+.metricas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.metrica-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.metrica-valor {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #2c5aa0;
+    display: block;
+}
+
+.metrica-label {
+    font-size: 0.9em;
+    color: #6c757d;
+}
+
+.metrica-tendencia {
+    font-size: 0.8em;
+    margin-top: 5px;
+}
+
+.tendencia-positiva {
+    color: #28a745;
+}
+
+.tendencia-negativa {
+    color: #dc3545;
+}
+
+/* TABLAS DE ANÁLISIS */
+.tabla-analisis {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+
+.tabla-analisis th,
+.tabla-analisis td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.tabla-analisis th {
+    background: #e9ecef;
+    font-weight: 600;
+}
+
+.tabla-analisis tr:hover {
+    background: #f8f9fa;
+}
+
+/* GRÁFICOS Y VISUALIZACIONES */
+.chart-container {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin-top: 15px;
+}
+
+.chart-placeholder {
+    height: 200px;
+    background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%), 
+                linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #f8f9fa 75%), 
+                linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* BOTONES DE EXPORTACIÓN */
+.botones-exportacion {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.btn-exportar {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-exportar-pdf {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-exportar-excel {
+    background: #28a745;
+    color: white;
+}
+
+.btn-exportar:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* LOADING DASHBOARD */
+.dashboard-loading {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.dashboard-error {
+    text-align: center;
+    padding: 40px;
+    color: #dc3545;
+    background: #f8d7da;
+    border-radius: 8px;
+}
+
+/* MEJORAR ESTILOS DE TABLAS */
+.tabla-analisis {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.85em;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tabla-analisis th,
+.tabla-analisis td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.tabla-analisis th {
+    background: #2c5aa0;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.tabla-analisis tr:hover {
+    background: #f8f9fa;
+}
+
+.tabla-analisis tr:last-child td {
+    border-bottom: none;
+}
+
+/* MEJORAR MÉTRICAS */
+.metricas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.metrica-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.metrica-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.metrica-valor {
+    font-size: 2em;
+    font-weight: bold;
+    color: #2c5aa0;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.metrica-label {
+    font-size: 0.85em;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.metrica-sin-datos {
+    font-size: 0.8em;
+    color: #dc3545;
+    font-style: italic;
+}
+
+/* MEJORAR TENDENCIAS */
+.tendencia-positiva {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.tendencia-negativa {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.tendencia-estable {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+/* SCROLL HORIZONTAL PARA TABLAS */
+.tabla-container {
+    overflow-x: auto;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+/* MEJORAR NÚMEROS GRANDES */
+.numero-grande {
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+.precio-formateado {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+/* BADGES PARA POTENCIAL/RIESGO */
+.badge-potencial {
+    background: #28a745;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+}
+
+.badge-riesgo {
+    background: #dc3545;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+}
+
+.badge-medio {
+    background: #ffc107;
+    color: #212529;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+}
+
+.badge-bajo {
+    background: #17a2b8;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+}

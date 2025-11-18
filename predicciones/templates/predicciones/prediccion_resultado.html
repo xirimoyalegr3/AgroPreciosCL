@@ -17,7 +17,7 @@
         <small class="text-muted">({{ unidad }}) en {{ region }}</small>
       </h2>
       <p class="text-center text-muted mb-0">
-        📅 Próximas {{ resultados|length }} semanas a partir del <strong>{{ proximo_lunes }}</strong>
+         Próximas {{ resultados|length }} semanas a partir del <strong>{{ proximo_lunes }}</strong>
       </p>
     </div>
   </div>
@@ -28,7 +28,7 @@
       <div class="alert alert-info">
         <div class="row">
           <div class="col-md-4">
-            <strong>📊 Último dato disponible:</strong><br>
+            <strong> Último dato disponible:</strong><br>
             {% if ultimo_dato_real %}
               ${{ ultimo_dato_real.precio|floatformat:2 }} el {{ ultimo_dato_real.fecha }}
             {% else %}
@@ -36,11 +36,11 @@
             {% endif %}
           </div>
           <div class="col-md-4">
-            <strong>🎯 Inicio de predicciones:</strong><br>
+            <strong> Inicio de predicciones:</strong><br>
             {{ proximo_lunes }} (próximo ciclo ODEPA)
           </div>
           <div class="col-md-4">
-            <strong>📈 Horizonte:</strong><br>
+            <strong> Horizonte:</strong><br>
             {{ resultados|length }} semana{{ resultados|length|pluralize }}
           </div>
         </div>
@@ -230,7 +230,7 @@
       <div class="alert alert-warning">
         <div class="row">
           <div class="col-md-8">
-            <strong>💡 Información importante:</strong><br>
+            <strong> Información importante:</strong><br>
             <small>
               • Los datos de ODEPA se actualizan semanalmente los lunes<br>
               • Los precios están normalizados para comparación consistente<br>

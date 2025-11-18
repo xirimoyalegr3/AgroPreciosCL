@@ -20,7 +20,6 @@
             <img src="{% static 'mapaInteractivo/img/logo.png' %}" alt="AgroPrecios CL" class="logo-img">
         </a>
 
-
         <nav class="nav-buttons">
             <a href="{% url 'mapa_interactivo' %}" class="nav-btn">Mapa Interactivo</a>
             <a href="{% url 'prediccion_home' %}" class="nav-btn">Predicciones</a>
@@ -30,7 +29,9 @@
     <main>
         {% block content %}{% endblock %}
     </main>
+<script src="{% static 'mapaInteractivo/js/dashboard.js' %}"></script>
 
     {% block extra_scripts %}{% endblock %}
+
 </body>
 </html>

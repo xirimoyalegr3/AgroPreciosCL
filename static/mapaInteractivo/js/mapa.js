@@ -11,6 +11,8 @@ class MapaInteractivo {
         };
         this.marcadoresRegiones = {};
         this.init();
+                this.dashboard = null; 
+
     }
 
     init() {
@@ -20,6 +22,11 @@ class MapaInteractivo {
         this.agregarMarcadoresRegiones();
         this.configurarEventListeners();
         this.inicializarPanelAnalisis();
+                this.inicializarDashboard();  
+
+    }
+        inicializarDashboard() {
+        this.dashboard = new DashboardAnalisis(this);
     }
 
     inicializarMapa() {

@@ -24,14 +24,14 @@ def prediccion_home(request):
             region = form.cleaned_data['region']
             horizonte = form.cleaned_data['horizonte']
             
-            print(f"🎯 Iniciando predicción: {fruta} - {unidad} - {region} - {horizonte}")
+            print(f" Iniciando predicción: {fruta} - {unidad} - {region} - {horizonte}")
             
-            # 🔹 VERIFICAR CACHE PRIMERO (sin incluir el form)
+            #  VERIFICAR CACHE PRIMERO (sin incluir el form)
             cache_key = f"prediccion_{fruta}_{region}_{unidad}_{horizonte}"
             cached_result = cache.get(cache_key)
             
             if cached_result:
-                print("✅ Usando predicción desde cache")
+                print(" Usando predicción desde cache")
                 # Crear un nuevo form para mostrar (no usar el del cache)
                 categorias = PrecioProducto.objects.values_list('categoria_unidad', flat=True).distinct()
                 form.fields['categoria'].choices = [(c, c) for c in categorias]
@@ -39,12 +39,12 @@ def prediccion_home(request):
                 return render(request, 'predicciones/prediccion_resultado.html', cached_result)
             
             try:
-                # 🔹 CARGAR MODELO
+                #  CARGAR MODELO
                 modelo = cargar_modelo(fruta, unidad, region)
-                print("✅ Modelo cargado correctamente")
+                print(" Modelo cargado correctamente")
                 
             except FileNotFoundError:
-                print("❌ Modelo no encontrado")
+                print(" Modelo no encontrado")
                 categorias = PrecioProducto.objects.values_list('categoria_unidad', flat=True).distinct()
                 form.fields['categoria'].choices = [(c, c) for c in categorias]
                 return render(request, 'predicciones/home.html', {
@@ -52,7 +52,7 @@ def prediccion_home(request):
                     'error': 'No se encontró modelo entrenado para esta combinación de producto, región y unidad.'
                 })
             except Exception as e:
-                print(f"❌ Error cargando modelo: {e}")
+                print(f" Error cargando modelo: {e}")
                 categorias = PrecioProducto.objects.values_list('categoria_unidad', flat=True).distinct()
                 form.fields['categoria'].choices = [(c, c) for c in categorias]
                 return render(request, 'predicciones/home.html', {
@@ -60,7 +60,7 @@ def prediccion_home(request):
                     'error': f'Error al cargar el modelo: {str(e)}'
                 })
 
-            # 🔹 OBTENER DATOS HISTÓRICOS
+            #  OBTENER DATOS HISTÓRICOS
             registros = PrecioProducto.objects.filter(
                 producto=fruta,
                 region=region,
@@ -69,7 +69,7 @@ def prediccion_home(request):
 
             df = pd.DataFrame(list(registros.values()))
             
-            # 🔹 OBTENER ÚLTIMO DATO REAL Y CALCULAR FECHAS
+            #  OBTENER ÚLTIMO DATO REAL Y CALCULAR FECHAS
             ultimo_dato_real = None
             precio_ultimo_real = None
             fecha_ultimo_real = None
@@ -88,7 +88,7 @@ def prediccion_home(request):
                     precio_ultimo_real = ultimo_dato_real['precio_normalizado']
                     fecha_ultimo_real = ultimo_dato_real['fecha'].strftime('%Y-%m-%d')
                     ultima_fecha_datos = ultimo_dato_real['fecha'].date()
-                    print(f"📊 Último dato real: {fecha_ultimo_real} - ${precio_ultimo_real}")
+                    print(f" Último dato real: {fecha_ultimo_real} - ${precio_ultimo_real}")
                 else:
                     # Fallback a precio_promedio si no hay precio_normalizado
                     ultimo_registro = df[df['precio_promedio'].notna()].tail(1)
@@ -98,17 +98,17 @@ def prediccion_home(request):
                         fecha_ultimo_real = ultimo_dato_real['fecha'].strftime('%Y-%m-%d')
                         ultima_fecha_datos = ultimo_dato_real['fecha'].date()
                         campo_usado = 'precio_promedio'
-                        print(f"📊 Último dato real (promedio): {fecha_ultimo_real} - ${precio_ultimo_real}")
+                        print(f" Último dato real (promedio): {fecha_ultimo_real} - ${precio_ultimo_real}")
                     else:
-                        print("⚠️ No se encontraron datos reales con precio_normalizado ni precio_promedio")
+                        print(" No se encontraron datos reales con precio_normalizado ni precio_promedio")
                         # Si no hay datos válidos, usar la fecha más reciente del dataset
                         ultima_fecha_datos = df['fecha'].max().date() if not df.empty else datetime.now().date()
             else:
                 ultima_fecha_datos = datetime.now().date()
-                print("⚠️ No hay datos históricos")
+                print(" No hay datos históricos")
 
-            # 🔹 CALCULAR FECHAS DE PREDICCIÓN BASADAS EN ÚLTIMO DATO DISPONIBLE
-            print(f"📊 Última fecha en datos: {ultima_fecha_datos}")
+            #  CALCULAR FECHAS DE PREDICCIÓN BASADAS EN ÚLTIMO DATO DISPONIBLE
+            print(f" Última fecha en datos: {ultima_fecha_datos}")
 
             # Calcular el próximo ciclo (lunes) después del último dato disponible
             dias_hasta_proximo_ciclo = (0 - ultima_fecha_datos.weekday()) % 7
@@ -118,19 +118,19 @@ def prediccion_home(request):
 
             fecha_inicio_prediccion = ultima_fecha_datos + timedelta(days=dias_hasta_proximo_ciclo)
 
-            print(f"🎯 Inicio predicción (próximo ciclo ODEPA): {fecha_inicio_prediccion}")
+            print(f" Inicio predicción (próximo ciclo ODEPA): {fecha_inicio_prediccion}")
 
-            # 🔹 CALCULAR DÍAS SIN DATOS
+            #  CALCULAR DÍAS SIN DATOS
             dias_sin_datos = None
             if not df.empty:
                 dias_sin_datos = (fecha_inicio_prediccion - ultima_fecha_datos).days - 7
                 if dias_sin_datos < 0:
                     dias_sin_datos = 0
-                print(f"📅 Días sin datos antes de predicción: {dias_sin_datos} días")
+                print(f" Días sin datos antes de predicción: {dias_sin_datos} días")
 
             if df.empty:
                 # Si no hay datos históricos
-                print("⚠️ No hay datos históricos, usando valores base")
+                print(" No hay datos históricos, usando valores base")
                 X_actual = pd.DataFrame([{
                     'mes': fecha_inicio_prediccion.month, 
                     'ano': fecha_inicio_prediccion.year, 
@@ -140,19 +140,19 @@ def prediccion_home(request):
                     'rol_mean_7': 1000, 'rol_std_30': 100, 'pct_change_7': 0
                 }])
             else:
-                # 🔹 PARA EL MODELO: Usar precio_normalizado como campo principal
+                #  PARA EL MODELO: Usar precio_normalizado como campo principal
                 campo_precio_modelo = 'precio_normalizado'
                 
                 # Si no hay precio_normalizado, usar precio_promedio como fallback
                 if df['precio_normalizado'].isna().all() and not df['precio_promedio'].isna().all():
                     campo_precio_modelo = 'precio_promedio'
-                    print("⚠️ Usando precio_promedio como fallback para el modelo")
+                    print(" Usando precio_promedio como fallback para el modelo")
                 elif df['precio_normalizado'].isna().all():
                     # Si ambos están vacíos, crear valores dummy
                     df['precio_normalizado'] = df.get('precio_minimo', 1000)
-                    print("⚠️ Usando valores dummy para precio_normalizado")
+                    print(" Usando valores dummy para precio_normalizado")
                 
-                print(f"🎯 Campo usado para el modelo: {campo_precio_modelo}")
+                print(f" Campo usado para el modelo: {campo_precio_modelo}")
                 
                 # Calcular características temporales para el modelo
                 df['mes'] = df['fecha'].dt.month
@@ -180,10 +180,10 @@ def prediccion_home(request):
                         df[col] = 0
                 
                 X_actual = df[columnas_modelo].tail(1)
-                print(f"📊 Última fecha en datos históricos: {df['fecha'].max()}")
-                print(f"🎯 Características para predicción: {X_actual.to_dict('records')[0]}")
+                print(f" Última fecha en datos históricos: {df['fecha'].max()}")
+                print(f" Características para predicción: {X_actual.to_dict('records')[0]}")
 
-            # 🔹 PREDICCIÓN SEMANAL
+            #  PREDICCIÓN SEMANAL
             if horizonte == '1w':
                 semanas = 1
             elif horizonte == '4w':
@@ -196,7 +196,7 @@ def prediccion_home(request):
             
             X_pred = X_actual.copy()
 
-            print("🔮 Iniciando predicción iterativa...")
+            print(" Iniciando predicción iterativa...")
             for i in range(semanas):
                 try:
                     fecha_pred = fecha_inicio_prediccion + timedelta(weeks=i)
@@ -225,10 +225,10 @@ def prediccion_home(request):
                     else:
                         X_pred['pct_change_7'] = 0
                         
-                    print(f"📅 Semana {i+1}: {fecha_pred} - Precio: ${y_pred:.2f}")
+                    print(f" Semana {i+1}: {fecha_pred} - Precio: ${y_pred:.2f}")
                         
                 except Exception as e:
-                    print(f"❌ Error en predicción semana {i+1}: {e}")
+                    print(f" Error en predicción semana {i+1}: {e}")
                     # En caso de error, usar el último precio predicho o un valor base
                     ultimo_precio = precios_predichos[-1] if precios_predichos else 1000
                     precios_predichos.append(ultimo_precio)
@@ -239,9 +239,9 @@ def prediccion_home(request):
 
             if len(precios_historicos) >= 5 and len(precios_predichos) >= 5:
                 metricas = calcular_metricas_confianza(precios_historicos, precios_predichos)
-                print(f"✅ Métricas calculadas: {metricas['confianza']}% de confianza")
-                print(f"📈 Tendencia: {metricas['tendencia']}")
-                print(f"⚡ Volatilidad: {metricas['volatilidad']}")
+                print(f" Métricas calculadas: {metricas['confianza']}% de confianza")
+                print(f" Tendencia: {metricas['tendencia']}")
+                print(f" Volatilidad: {metricas['volatilidad']}")
             else:
                 metricas = {
                     'confianza': 75, 
@@ -252,7 +252,7 @@ def prediccion_home(request):
                     'error_relativo': 0
                 }
                 print("Métricas base por datos insuficientes")
-            # 🔹 PREPARAR DATOS PARA EL GRÁFICO CON ÚLTIMO DATO REAL
+            #  PREPARAR DATOS PARA EL GRÁFICO CON ÚLTIMO DATO REAL
             datos_grafico = {
                 'predicciones': [],
                 'ultimo_real': None
@@ -298,7 +298,7 @@ def prediccion_home(request):
                     'campo_usado': campo_usado
                 }
 
-            # 🔹 PREPARAR CONTEXTO FINAL (SIN EL FORM PARA CACHE)
+            #  PREPARAR CONTEXTO FINAL (SIN EL FORM PARA CACHE)
             cache_context = {
                 'fruta': fruta,
                 'region': region,
@@ -317,17 +317,17 @@ def prediccion_home(request):
             render_context = cache_context.copy()
             render_context['form'] = form
 
-            # 🔹 GUARDAR EN CACHE (solo datos serializables)
+            #  GUARDAR EN CACHE (solo datos serializables)
             cache.set(cache_key, cache_context, 3600)  # Cache por 1 hora
-            print(f"💾 Predicción guardada en cache (key: {cache_key})")
-            print(f"✅ Predicción completada: {len(precios_predichos)} semanas")
-            print(f"📅 Rango de fechas: {fechas_prediccion[0]} a {fechas_prediccion[-1]}")
-            print(f"📊 Rango de precios predichos: ${min(precios_predichos):.2f} - ${max(precios_predichos):.2f}")
+            print(f" Predicción guardada en cache (key: {cache_key})")
+            print(f" Predicción completada: {len(precios_predichos)} semanas")
+            print(f" Rango de fechas: {fechas_prediccion[0]} a {fechas_prediccion[-1]}")
+            print(f" Rango de precios predichos: ${min(precios_predichos):.2f} - ${max(precios_predichos):.2f}")
 
             return render(request, 'predicciones/prediccion_resultado.html', render_context)
         else:
             # Formulario no válido
-            print("❌ Formulario no válido")
+            print(" Formulario no válido")
             categorias = PrecioProducto.objects.values_list('categoria_unidad', flat=True).distinct()
             form.fields['categoria'].choices = [(c, c) for c in categorias]
             return render(request, 'predicciones/home.html', {
@@ -362,7 +362,7 @@ def limpiar_cache(request):
         cache.clear()
         return render(request, 'predicciones/home.html', {
             'form': PrediccionForm(),
-            'success': '✅ Cache limpiado correctamente'
+            'success': ' Cache limpiado correctamente'
         })
     else:
         return render(request, 'predicciones/home.html', {

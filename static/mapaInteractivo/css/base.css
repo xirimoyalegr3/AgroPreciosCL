@@ -106,16 +106,18 @@ body {
    ==== HEADER CON BORDE + BOTONES ====
    ============================================================ */
 .header-border {
-    border: 2px solid #2c5aa0;        /* Borde azul */
-    padding: 6px 15px;                /* Más delgado verticalmente */
+    width: 100%;                  /* Asegura ancho completo */
+    padding: 0px;
     background-color: #fefefe;
-    border-radius: 6px;
-    margin-bottom: 10px;
-
+    border-bottom: 2px solid #e0e0e0;   /* más elegante que border-radius */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-radius: 0;             /* Evita efecto de "caja flotante" */
+    margin: 0;                    /* Evita separación con el contenido */
 }
+
+
 
 /* Contenedor de botones */
 .nav-buttons {
