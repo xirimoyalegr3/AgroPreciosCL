@@ -57,14 +57,14 @@ def predecir_futuro(df, producto, unidad, region, horizonte, unidad_tiempo):
 
 
     if not os.path.exists(modelo_path):
-        print(f"❌ No se encontró modelo para {producto_unidad} - {region}")
+        print(f"No se encontró modelo para {producto_unidad} - {region}")
         return None
 
     modelo = joblib.load(modelo_path)
 
     df_filt = df[(df['producto_unidad'] == producto_unidad) & (df['region'] == region)].copy()
     if df_filt.empty:
-        print(f"⚠️ No hay datos recientes para {producto_unidad} - {region}")
+        print(f"No hay datos recientes para {producto_unidad} - {region}")
         return None
 
     # Tomar la última fila (último día observado)
@@ -122,7 +122,7 @@ def predecir_futuro(df, producto, unidad, region, horizonte, unidad_tiempo):
     salida_path = os.path.join(SALIDA_DIR, f"prediccion_{cleaned_producto}_{cleaned_region}_{cleaned_unidad_tiempo}.csv")
 
     df_pred.to_csv(salida_path, index=False)
-    print(f"✅ Predicción guardada en {salida_path}")
+    print(f"Predicción guardada en {salida_path}")
     return df_pred
 
 # ==============================
@@ -133,7 +133,7 @@ def main():
     producto, unidad, region, horizonte, unidad_tiempo = parse_arguments()
 
     if not os.path.exists(DATOS_RECIENTES):
-        print("❌ No se encontró el archivo de datos recientes.")
+        print("No se encontró el archivo de datos recientes.")
         return
 
     df = pd.read_csv(DATOS_RECIENTES, parse_dates=["fecha"])

@@ -5,12 +5,12 @@ from predicciones.models import PrecioProducto
 
 def cargar_datos_desde_csv(nombre_archivo="datos_combinados_features_2016-2025.csv"):
     ruta_csv = os.path.join(settings.BASE_DIR, "datos", nombre_archivo)
-    print(f"📥 Cargando datos desde: {ruta_csv}")
+    print(f"Cargando datos desde: {ruta_csv}")
 
     df = pd.read_csv(ruta_csv)
 
-    print(f"📊 Columnas encontradas: {list(df.columns)}")
-    print(f"📈 Total de filas: {len(df)}")
+    print(f"Columnas encontradas: {list(df.columns)}")
+    print(f"Total de filas: {len(df)}")
 
     objetos = []
     for _, row in df.iterrows():
@@ -33,18 +33,18 @@ def cargar_datos_desde_csv(nombre_archivo="datos_combinados_features_2016-2025.c
                 origen=row.get('origen'),
             ))
         except Exception as e:
-            print(f"⚠️ Error al procesar fila: {e}")
+            print(f"Error al procesar fila: {e}")
             continue
 
         # Guardar por lotes cada 5000 filas para no saturar la memoria
         if len(objetos) >= 5000:
             PrecioProducto.objects.bulk_create(objetos, ignore_conflicts=True)
             objetos.clear()
-            print("💾 Guardado parcial de 5000 registros")
+            print("Guardado parcial de 5000 registros")
 
     # Guardar los que queden
     if objetos:
         PrecioProducto.objects.bulk_create(objetos, ignore_conflicts=True)
-        print(f"💾 Guardado final de {len(objetos)} registros")
+        print(f"Guardado final de {len(objetos)} registros")
 
     print("✅ Carga completa de datos en la base de datos")

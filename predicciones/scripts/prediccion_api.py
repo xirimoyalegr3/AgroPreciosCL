@@ -18,7 +18,7 @@ def cargar_modelo(fruta, categoria_unidad, region):
     Carga el modelo correspondiente según fruta, categoría y región.
     """
     import inspect
-    print("📌 Archivo REAL desde el que se ejecuta cargar_modelo:", inspect.getfile(cargar_modelo))
+    print("Archivo REAL desde el que se ejecuta cargar_modelo:", inspect.getfile(cargar_modelo))
 
     # NORMALIZAR AQUÍ
     fruta_norm = normalizar(fruta)
@@ -31,13 +31,13 @@ def cargar_modelo(fruta, categoria_unidad, region):
     ruta_modelo = os.path.abspath(os.path.join(base_dir, nombre_modelo))
 
     # DEBUG
-    print("🔎 Buscando modelo con nombre:", nombre_modelo)
-    print("📍 Ruta completa:", ruta_modelo)
-    print("📂 Existe?:", os.path.exists(ruta_modelo))
+    print("Buscando modelo con nombre:", nombre_modelo)
+    print("Ruta completa:", ruta_modelo)
+    print("Existe?:", os.path.exists(ruta_modelo))
 
     if not os.path.exists(ruta_modelo):
         raise FileNotFoundError(f"Modelo no encontrado: {ruta_modelo}")
 
     modelo = joblib.load(ruta_modelo)
-    print(f"✅ Modelo cargado: {ruta_modelo}")
+    print(f"Modelo cargado: {ruta_modelo}")
     return modelo
