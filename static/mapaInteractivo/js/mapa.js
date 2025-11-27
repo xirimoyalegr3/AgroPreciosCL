@@ -82,6 +82,7 @@ class MapaInteractivo {
                     <button id="limpiar-analisis" class="btn-filtro btn-secundario">Limpiar Analisis</button>
                 </div>
                 <br>
+
                 <br>
             <br>
             `;
@@ -159,6 +160,7 @@ class MapaInteractivo {
             this.mostrarError('estadisticas-globales', 'No se pudieron cargar las estadisticas generales');
         }
     }
+
 
     mostrarResumenGeneral(data) {
         const contenedor = document.getElementById('estadisticas-globales');
@@ -268,7 +270,7 @@ mostrarFiltros(data) {
         </div>
     `;
 
-    // Configurar event listeners
+    // Configurar event listeners CORREGIDOS
     document.getElementById('filtro-subsector').addEventListener('change', (e) => {
         this.actualizarProductosPorSubsector(e.target.value);
     });
@@ -320,7 +322,7 @@ async actualizarProductosPorSubsector(subsectorNombre) {
     } catch (error) {
         console.error('Error actualizando productos por subsector:', error);
 
-        //  Cargar todos los productos si hay error
+        //  FALLBACK: Cargar todos los productos si hay error
         await this.cargarTodosLosProductos();
         this.mostrarMensaje('Error cargando productos del subsector. Mostrando todos los productos.', 'warning');
     }
@@ -365,7 +367,7 @@ aplicarFiltros() {
 
     this.mostrarFiltrosActivos();
 
-    //   : Actualizar panel lateral con filtros
+    //  CORREGIDO: Actualizar panel lateral con filtros
     if (this.regionSeleccionada) {
         this.actualizarPanelRegionConFiltros();
     } else {
@@ -402,7 +404,7 @@ async actualizarPanelRegionConFiltros() {
 
         console.log(` Datos recibidos con filtros:`, data);
 
-        //  ACTUALISAR TODAS LAS ESTADÍSTICAS
+        //  ACTUALIZAR TODAS LAS ESTADÍSTICAS, no solo registros
         this.actualizarEstadisticasRegion(data);
         this.mostrarProductosRegion(data);
 
@@ -412,7 +414,7 @@ async actualizarPanelRegionConFiltros() {
 }
 
 actualizarEstadisticasRegion(data) {
-    //  Actualizar los contadores, no solo registros
+    //  Actualizar TODOS los contadores, no solo registros
     const actualizarStat = (selector, valor, esPorcentaje = false) => {
         const element = document.querySelector(selector);
         if (element) {
@@ -791,6 +793,7 @@ mostrarInfoRegion(data) {
         return `Region ${regionId}`;
     }
 
+// En la clase MapaInteractivo - REEMPLAZAR la función compararRegiones
 async compararRegiones() {
     try {
         if (this.regionesAnalisis.size === 0) {

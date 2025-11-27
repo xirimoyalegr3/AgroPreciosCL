@@ -975,63 +975,66 @@ filtrarPorFechaDesdeDashboard(fechaLabel) {
     }
 
 exportarPDF() {
-        try {
-            this.mostrarMensaje('Generando reporte PDF...', 'info');
-
-            // Incluir filtros en la exportación
-            const params = new URLSearchParams();
-            Object.entries(this.filtrosActuales).forEach(([key, value]) => {
-                if (value && value !== '') {
-                    params.append(key, value);
-                }
-            });
-
-            const link = document.createElement('a');
-            link.href = `/api/exportar-pdf/?${params.toString()}`;
-            link.download = 'reporte_analisis_agroprecios.pdf';
-            link.style.display = 'none';
-
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            this.mostrarMensaje('Reporte PDF generado correctamente', 'success');
-
-        } catch (error) {
-            console.error('Error exportando a PDF:', error);
-            this.mostrarMensaje('Error al generar el PDF', 'error');
-        }
+    try {
+        this.mostrarMensaje('Generando reporte PDF...', 'info');
+        
+        //  CONSTRUIR URL CON FILTROS ACTUALES
+        const params = new URLSearchParams();
+        Object.entries(this.filtrosActuales).forEach(([key, value]) => {
+            if (value && value !== '') {
+                params.append(key, value);
+            }
+        });
+        
+        console.log(` Exportando PDF con filtros: ${params.toString()}`);
+        
+        const link = document.createElement('a');
+        link.href = `/api/exportar-pdf/?${params.toString()}`;
+        link.download = 'reporte_agroprecios.pdf';
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        this.mostrarMensaje('Reporte PDF generado correctamente', 'success');
+        
+    } catch (error) {
+        console.error('Error exportando a PDF:', error);
+        this.mostrarMensaje('Error al generar el PDF', 'error');
     }
+}
 
-    exportarExcel() {
-        try {
-            this.mostrarMensaje('Generando reporte Excel...', 'info');
-
-            // Incluir filtros en la exportación
-            const params = new URLSearchParams();
-            Object.entries(this.filtrosActuales).forEach(([key, value]) => {
-                if (value && value !== '') {
-                    params.append(key, value);
-                }
-            });
-
-            const link = document.createElement('a');
-            link.href = `/api/exportar-excel/?${params.toString()}`;
-            link.download = 'reporte_analisis_agroprecios.xlsx';
-            link.style.display = 'none';
-
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            this.mostrarMensaje('Reporte Excel generado correctamente', 'success');
-
-        } catch (error) {
-            console.error('Error exportando a Excel:', error);
-            this.mostrarMensaje('Error al generar el Excel', 'error');
-        }
+exportarExcel() {
+    try {
+        this.mostrarMensaje('Generando reporte Excel...', 'info');
+        
+        //  CONSTRUIR URL CON FILTROS ACTUALES
+        const params = new URLSearchParams();
+        Object.entries(this.filtrosActuales).forEach(([key, value]) => {
+            if (value && value !== '') {
+                params.append(key, value);
+            }
+        });
+        
+        console.log(` Exportando Excel con filtros: ${params.toString()}`);
+        
+        const link = document.createElement('a');
+        link.href = `/api/exportar-excel/?${params.toString()}`;
+        link.download = 'reporte_agroprecios.xlsx';
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        this.mostrarMensaje('Reporte Excel generado correctamente', 'success');
+        
+    } catch (error) {
+        console.error('Error exportando a Excel:', error);
+        this.mostrarMensaje('Error al generar el Excel', 'error');
     }
-
+}
 //   Secciones para análisis general
 generarSeccionesGenerales() {
     return `

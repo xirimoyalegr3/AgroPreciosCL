@@ -23,15 +23,14 @@ urlpatterns = [
     #API Del dashboard
     path('api/dashboard-analisis/', views.dashboard_analisis, name='dashboard_analisis'),
 
-path('api/exportar-pdf/', views.exportar_dashboard_pdf, name='exportar_pdf'),
-path('api/exportar-excel/', views.exportar_dashboard_excel, name='exportar_excel'),
+    path('api/exportar-pdf/', views.exportar_dashboard_pdf, name='exportar_pdf'),
+    path('api/exportar-excel/', views.exportar_dashboard_excel, name='exportar_excel'),
 
-# Nuevas APIs para gráficos
+    # Nuevas APIs para gráficos
     path('api/graficos/precios-temporales/', views.api_grafico_precios_temporales, name='grafico_precios_temporales'),
     path('api/graficos/distribucion-regiones/', views.api_grafico_distribucion_regiones, name='grafico_distribucion_regiones'),
     path('api/graficos/estacionalidad/', views.api_grafico_estacionalidad, name='grafico_estacionalidad'),
     path('api/debug/regiones/', views.debug_regiones, name='debug_regiones'),
 
-    
-
+    path('limpiarcache/', views.limpiar_cache_vistas, name='limpiar_cache_vistas'),
 ]

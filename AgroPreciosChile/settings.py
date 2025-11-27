@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure--vqt@&x6b$hjcy)@p(p3b0c9$m5!y3%yabz7y3oj^n-qxk)e8v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
 
 # Application definition
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'mapaInteractivo',
     'predicciones',
     'django_select2',
+
 
 ]
 
