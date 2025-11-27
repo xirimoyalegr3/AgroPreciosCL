@@ -7,12 +7,12 @@ class MapaInteractivo {
         this.filtros = {
             subsector: '',
             producto: '',
-            año: ''
+            año: '',
+            region_id: ''
         };
         this.marcadoresRegiones = {};
+        this.dashboard = null;
         this.init();
-                this.dashboard = null; 
-
     }
 
     init() {
@@ -22,20 +22,29 @@ class MapaInteractivo {
         this.agregarMarcadoresRegiones();
         this.configurarEventListeners();
         this.inicializarPanelAnalisis();
-                this.inicializarDashboard();  
 
+        // Inicializar dashboard DESPUÉS de que todo esté listo
+        setTimeout(() => {
+            this.inicializarDashboard();
+        }, 1000);
     }
-inicializarDashboard() {
-    if (typeof DashboardAnalisis !== 'undefined') {
-        try {
-            this.dashboard = new DashboardAnalisis(this);
-            window.dashboard = this.dashboard; // Hacerlo global
-            console.log('Dashboard inicializado correctamente');
-        } catch (error) {
-            console.error('Error inicializando dashboard:', error);
+
+    inicializarDashboard() {
+        if (typeof DashboardAnalisis !== 'undefined') {
+            try {
+                this.dashboard = new DashboardAnalisis(this);
+                // Llamar init() explícitamente después de crear la instancia
+                this.dashboard.init();
+                window.dashboard = this.dashboard;
+                console.log('Dashboard inicializado correctamente');
+            } catch (error) {
+                console.error('Error inicializando dashboard:', error);
+            }
+        } else {
+            console.error('DashboardAnalisis no está definido');
         }
     }
-}
+
 
     inicializarMapa() {
         this.mapa = L.map('mapa').setView([-35.6751, -71.5430], 5);
@@ -73,7 +82,6 @@ inicializarDashboard() {
                     <button id="limpiar-analisis" class="btn-filtro btn-secundario">Limpiar Analisis</button>
                 </div>
                 <br>
-                
                 <br>
             <br>
             `;
@@ -135,16 +143,16 @@ inicializarDashboard() {
     async cargarResumenGeneral() {
         try {
             this.mostrarCargando('estadisticas-globales', 'Cargando estadisticas...');
-            
+
             const response = await fetch('/api/resumen/');
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-            
+
             const data = await response.json();
-            
+
             if (data.error) {
                 throw new Error(data.error);
             }
-            
+
             this.mostrarResumenGeneral(data);
         } catch (error) {
             console.error('Error cargando resumen:', error);
@@ -154,7 +162,7 @@ inicializarDashboard() {
 
     mostrarResumenGeneral(data) {
         const contenedor = document.getElementById('estadisticas-globales');
-        
+
         let fechaReciente = 'N/A';
         if (data.fecha_reciente) {
             const fecha = new Date(data.fecha_reciente);
@@ -185,21 +193,20 @@ inicializarDashboard() {
         `;
     }
 
-// REEMPLAZAR completamente las funciones relacionadas con filtros:
 
 async cargarFiltrosDisponibles() {
     try {
         this.mostrarCargando('filtros-container', 'Cargando filtros...');
-        
+
         const response = await fetch('/api/filtros/');
         if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-        
+
         const data = await response.json();
-        
+
         if (data.error) {
             throw new Error(data.error);
         }
-        
+
         this.mostrarFiltros(data);
     } catch (error) {
         console.error('Error cargando filtros:', error);
@@ -209,8 +216,8 @@ async cargarFiltrosDisponibles() {
 
 mostrarFiltros(data) {
     const contenedor = document.getElementById('filtros-container');
-    
-    // Corregir: eliminar años duplicados
+
+    //   eliminar años duplicados
     let opcionesAños = '<option value="">Todos los años</option>';
     if (data.años && data.años.length > 0) {
         const añosUnicos = [...new Set(data.años)]; // Eliminar duplicados
@@ -261,7 +268,7 @@ mostrarFiltros(data) {
         </div>
     `;
 
-    // Configurar event listeners CORREGIDOS
+    // Configurar event listeners
     document.getElementById('filtro-subsector').addEventListener('change', (e) => {
         this.actualizarProductosPorSubsector(e.target.value);
     });
@@ -270,55 +277,56 @@ mostrarFiltros(data) {
     document.getElementById('limpiar-filtros').addEventListener('click', () => this.limpiarFiltros());
 }
 
-// REEMPLAZAR esta función completamente
 async actualizarProductosPorSubsector(subsectorNombre) {
     try {
         const selectProducto = document.getElementById('filtro-producto');
-        
+
         if (!subsectorNombre) {
-            // Si no hay subsector, cargar todos los productos
             await this.cargarTodosLosProductos();
             return;
         }
 
-        // Solo deshabilitar temporalmente, sin animaciones raras
         selectProducto.disabled = true;
         const valorOriginal = selectProducto.value;
-        selectProducto.innerHTML = '<option value="">Cargando productos...</option>';
+        selectProducto.innerHTML = '<option value="">Cargando productos del subsector...</option>';
 
-        // Buscar productos del subsector seleccionado
-        const response = await fetch('/api/filtros/');
-        const filtrosData = await response.json();
-        
+        //  USAR LA API CORRECTA
+        const response = await fetch(`/api/subsector/${encodeURIComponent(subsectorNombre)}/productos/`);
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+
         let opciones = '<option value="">Todos los productos</option>';
-        
-        if (filtrosData.productos && filtrosData.productos.length > 0) {
-            // Filtrar productos por subsector
-            const productosFiltrados = filtrosData.productos.filter(producto => {
-                // En una implementación real, aquí buscarías los productos del subsector
-                // Por ahora, cargamos todos los productos y el filtro se aplica después
-                return true;
-            });
-            
-            const productosOrdenados = productosFiltrados.sort((a, b) => a.nombre.localeCompare(b.nombre));
-            productosOrdenados.forEach(producto => {
+
+        if (data.productos && data.productos.length > 0) {
+            data.productos.forEach(producto => {
                 opciones += `<option value="${producto.nombre}">${producto.nombre}</option>`;
             });
+        } else {
+            opciones += '<option value="">No hay productos en este subsector</option>';
         }
-        
+
         selectProducto.innerHTML = opciones;
         selectProducto.disabled = false;
-        selectProducto.value = valorOriginal; // Mantener el valor seleccionado si existe
-        
+
+        // Mantener selección anterior si existe
+        if (valorOriginal && Array.from(selectProducto.options).some(opt => opt.value === valorOriginal)) {
+            selectProducto.value = valorOriginal;
+        }
+
     } catch (error) {
-        console.error('Error actualizando productos:', error);
-        const selectProducto = document.getElementById('filtro-producto');
-        selectProducto.innerHTML = '<option value="">Error cargando productos</option>';
-        selectProducto.disabled = false;
+        console.error('Error actualizando productos por subsector:', error);
+
+        //  Cargar todos los productos si hay error
+        await this.cargarTodosLosProductos();
+        this.mostrarMensaje('Error cargando productos del subsector. Mostrando todos los productos.', 'warning');
     }
 }
 
-// REEMPLAZAR esta función
+
 async cargarTodosLosProductos() {
     try {
         const selectProducto = document.getElementById('filtro-producto');
@@ -327,7 +335,7 @@ async cargarTodosLosProductos() {
 
         const response = await fetch('/api/filtros/');
         const data = await response.json();
-        
+
         let opciones = '<option value="">Todos los productos</option>';
         if (data.productos && data.productos.length > 0) {
             const productosOrdenados = data.productos.sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -335,10 +343,10 @@ async cargarTodosLosProductos() {
                 opciones += `<option value="${producto.nombre}">${producto.nombre}</option>`;
             });
         }
-        
+
         selectProducto.innerHTML = opciones;
         selectProducto.disabled = false;
-        
+
     } catch (error) {
         console.error('Error cargando todos los productos:', error);
         const selectProducto = document.getElementById('filtro-producto');
@@ -351,32 +359,145 @@ aplicarFiltros() {
     this.filtros = {
         subsector: document.getElementById('filtro-subsector').value,
         producto: document.getElementById('filtro-producto').value,
-        año: document.getElementById('filtro-año').value
+        año: document.getElementById('filtro-año').value,
+        region_id: this.regionSeleccionada ? this.regionSeleccionada.toString() : ''
     };
 
     this.mostrarFiltrosActivos();
 
-    // VERIFICAR que hay una región seleccionada Y que el elemento existe
-    if (this.regionSeleccionada && document.getElementById('lista-productos')) {
-        this.cargarProductosRegion(this.regionSeleccionada);
-    } else if (!this.regionSeleccionada) {
-        this.mostrarMensaje('Selecciona una región en el mapa para aplicar los filtros', 'info');
+    //   : Actualizar panel lateral con filtros
+    if (this.regionSeleccionada) {
+        this.actualizarPanelRegionConFiltros();
+    } else {
+        // Si no hay región seleccionada, mostrar mensaje
+        this.mostrarMensaje('Filtros aplicados. Selecciona una región para ver los resultados.', 'info');
+    }
+
+    // Actualizar dashboard
+    this.actualizarDashboardConFiltros();
+
+    //  Mostrar feedback al usuario
+    this.mostrarMensaje('Filtros aplicados correctamente', 'success');
+}
+
+async actualizarPanelRegionConFiltros() {
+    try {
+        if (!this.regionSeleccionada) return;
+
+        const regionId = this.regionSeleccionada;
+
+        const params = new URLSearchParams();
+        if (this.filtros.subsector) params.append('subsector', this.filtros.subsector);
+        if (this.filtros.producto) params.append('producto', this.filtros.producto);
+        if (this.filtros.año) params.append('año', this.filtros.año);
+
+        const url = `/api/region/${regionId}/productos/?${params.toString()}`;
+
+        console.log(` Llamando API con filtros: ${url}`);
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+        const data = await response.json();
+
+        console.log(` Datos recibidos con filtros:`, data);
+
+        //  ACTUALISAR TODAS LAS ESTADÍSTICAS
+        this.actualizarEstadisticasRegion(data);
+        this.mostrarProductosRegion(data);
+
+    } catch (error) {
+        console.error('Error actualizando panel con filtros:', error);
     }
 }
+
+actualizarEstadisticasRegion(data) {
+    //  Actualizar los contadores, no solo registros
+    const actualizarStat = (selector, valor, esPorcentaje = false) => {
+        const element = document.querySelector(selector);
+        if (element) {
+            const valorFormateado = esPorcentaje ?
+                `${valor}%` :
+                valor.toLocaleString('es-CL');
+            element.textContent = valorFormateado;
+        }
+    };
+
+    // Actualizar registros
+    actualizarStat('.stat-item:nth-child(1) .stat-number', data.total_registros || data.total_resultados || 0);
+
+    // Actualizar productos
+    actualizarStat('.stat-item:nth-child(2) .stat-number', data.total_productos || 0);
+
+    // Actualizar mercados
+    actualizarStat('.stat-item:nth-child(3) .stat-number', data.total_mercados || 0);
+
+    //  Agregar indicadores de filtro a TODOS los stats
+    const tieneFiltros = this.filtros.subsector || this.filtros.producto || this.filtros.año;
+    const statItems = document.querySelectorAll('.stat-item');
+
+    statItems.forEach(statItem => {
+        // Remover indicadores anteriores
+        const indicadoresAnteriores = statItem.querySelectorAll('.filtro-indicador');
+        indicadoresAnteriores.forEach(ind => ind.remove());
+
+        // Agregar nuevo indicador si hay filtros
+        if (tieneFiltros) {
+            const indicador = document.createElement('span');
+            indicador.className = 'filtro-indicador';
+            indicador.textContent = ' (filtrado)';
+            indicador.style.cssText = 'font-size: 0.7em; color: #28a745; font-weight: normal; font-style: italic; margin-left: 2px;';
+
+            const statLabel = statItem.querySelector('.stat-label');
+            if (statLabel) {
+                statLabel.appendChild(indicador);
+            }
+        }
+    });
+
+    console.log(` Estadísticas actualizadas: ${data.total_registros} reg, ${data.total_productos} prod, ${data.total_mercados} merc`);
+}
+
+
 
 limpiarFiltros() {
     document.getElementById('filtro-subsector').value = '';
     document.getElementById('filtro-producto').value = '';
     document.getElementById('filtro-año').value = '';
-    this.filtros = { subsector: '', producto: '', año: '' };
+
+    this.filtros = {
+        subsector: '',
+        producto: '',
+        año: '',
+        region_id: this.regionSeleccionada || ''
+    };
+
     this.ocultarFiltrosActivos();
-    
-    // VERIFICAR que hay una región seleccionada Y que el elemento existe
-    if (this.regionSeleccionada && document.getElementById('lista-productos')) {
+
+    //  RESTAURAR ESTADÍSTICAS ORIGINALES CUANDO SE LIMPIAN FILTROS
+    if (this.regionSeleccionada && this.datosOriginalesRegion) {
+        this.actualizarEstadisticasRegion(this.datosOriginalesRegion);
+    }
+
+    // Recargar productos sin filtros
+    if (this.regionSeleccionada) {
         this.cargarProductosRegion(this.regionSeleccionada);
     }
-    // Si no hay región seleccionada, no hacer nada silenciosamente
+
+    this.actualizarDashboardConFiltros();
+    this.mostrarMensaje('Filtros limpiados correctamente', 'success');
 }
+
+
+actualizarDashboardConFiltros() {
+    if (this.dashboard && this.dashboard.estado === 'abierto') {
+        console.log('Actualizando dashboard con filtros:', this.filtros);
+        this.dashboard.cargarDatosDashboard(this.filtros);
+    } else {
+        console.log('Dashboard no está abierto, no se actualiza');
+    }
+}
+
 
 mostrarFiltrosActivos() {
     let filtrosActivos = document.getElementById('filtros-activos');
@@ -431,7 +552,7 @@ ocultarFiltrosActivos() {
                 iconAnchor: [13, 13]
             });
 
-            const marcador = L.marker([region.lat, region.lng], { 
+            const marcador = L.marker([region.lat, region.lng], {
                 icon: iconoPersonalizado
             }).addTo(this.mapa);
 
@@ -476,37 +597,56 @@ ocultarFiltrosActivos() {
         });
     }
 
-    async seleccionarRegion(regionId) {
-        try {
-            if (!this.marcadoresRegiones[regionId]) {
-                console.warn(`Region ${regionId} no esta en el mapa`);
-                return;
-            }
-
-            this.regionSeleccionada = regionId;
-            this.mostrarCargando('info-region', 'Cargando informacion de la region...');
-            
-            this.resaltarRegionSeleccionada(regionId);
-            
-            const responseRegion = await fetch(`/api/region/${regionId}/`);
-            if (!responseRegion.ok) {
-                throw new Error(`Error cargando region: ${responseRegion.status}`);
-            }
-            
-            const dataRegion = await responseRegion.json();
-            
-            if (dataRegion.error) {
-                throw new Error(dataRegion.error);
-            }
-            
-            this.mostrarInfoRegion(dataRegion);
-            this.cargarProductosRegion(regionId);
-            
-        } catch (error) {
-            console.error('Error seleccionando region:', error);
-            this.mostrarError('info-region', 'Error cargando la region seleccionada');
+async seleccionarRegion(regionId) {
+    try {
+        if (!this.marcadoresRegiones[regionId]) {
+            console.warn(`Region ${regionId} no esta en el mapa`);
+            return;
         }
+
+        this.regionSeleccionada = regionId;
+
+        // ACTUALIZAR FILTROS CON LA NUEVA REGIÓN
+        this.filtros.region_id = regionId.toString();
+
+        this.mostrarCargando('info-region', 'Cargando informacion de la region...');
+        this.resaltarRegionSeleccionada(regionId);
+
+        const responseRegion = await fetch(`/api/region/${regionId}/`);
+        if (!responseRegion.ok) {
+            throw new Error(`Error cargando region: ${responseRegion.status}`);
+        }
+
+        const dataRegion = await responseRegion.json();
+
+        if (dataRegion.error) {
+            throw new Error(dataRegion.error);
+        }
+
+        this.mostrarInfoRegion(dataRegion);
+        this.cargarProductosRegion(regionId);
+
+        // ACTUALIZAR DASHBOARD CON LA NUEVA REGIÓN SELECCIONADA
+        this.actualizarDashboardConFiltros();
+
+        // NOTIFICAR AL USUARIO
+        this.mostrarMensaje(`Región ${dataRegion.region_nombre} seleccionada. Dashboard actualizado.`, 'success');
+
+    } catch (error) {
+        console.error('Error seleccionando region:', error);
+        this.mostrarError('info-region', 'Error cargando la region seleccionada');
     }
+}
+
+//   Para cuando el dashboard se abre manualmente
+notificarDashboardAbierto() {
+    if (this.dashboard) {
+        console.log('Dashboard abierto - sincronizando con estado actual');
+        // El dashboard se actualizará automáticamente con los filtros actuales
+    }
+}
+
+
 
     resaltarRegionSeleccionada(regionId) {
         Object.values(this.marcadoresRegiones).forEach(marcador => {
@@ -531,7 +671,7 @@ ocultarFiltrosActivos() {
 
 mostrarInfoRegion(data) {
     const contenedor = document.getElementById('info-region');
-    
+
     let subsectoresHTML = '';
     if (data.subsectores && data.subsectores.length > 0) {
         subsectoresHTML = data.subsectores.slice(0, 5).map(subsector => {
@@ -540,13 +680,12 @@ mostrarInfoRegion(data) {
         }).join('');
     }
 
-    // ASEGURAR que el contenedor #lista-productos se crea aquí
     contenedor.innerHTML = `
         <div class="region-header">
             <h3>${data.region_nombre}</h3>
             <div class="region-stats">
                 <div class="stat-item">
-                    <span class="stat-number">${data.total_registros?.toLocaleString('es-CL') || '0'}</span>
+                    <span class="stat-number">${(data.total_registros || 0).toLocaleString('es-CL')}</span>
                     <span class="stat-label">registros</span>
                 </div>
                 <div class="stat-item">
@@ -579,8 +718,15 @@ mostrarInfoRegion(data) {
             </div>
         </div>
     `;
-    
-    // Cargar los productos inmediatamente después de crear el contenedor
+
+    //  GUARDAR DATOS ORIGINALES PARA CUANDO SE LIMPIEN FILTROS
+    this.datosOriginalesRegion = {
+        total_registros: data.total_registros || 0,
+        total_productos: data.total_productos || 0,
+        total_mercados: data.total_mercados || 0
+    };
+
+    // Cargar los productos
     this.cargarProductosRegion(data.region_id);
 }
 
@@ -594,7 +740,7 @@ mostrarInfoRegion(data) {
             this.regionesAnalisis.add(regionId);
             this.actualizarListaAnalisis();
             this.mostrarMensaje(`Region "${regionNombre}" agregada al analisis`, 'success');
-            
+
         } catch (error) {
             console.error('Error agregando region al analisis:', error);
             this.mostrarMensaje('Error agregando region al analisis', 'error');
@@ -606,7 +752,7 @@ mostrarInfoRegion(data) {
             this.regionesAnalisis.delete(regionId);
             this.actualizarListaAnalisis();
             this.mostrarMensaje('Region removida del analisis', 'info');
-            
+
         } catch (error) {
             console.error('Error removiendo region del analisis:', error);
             this.mostrarMensaje('Error removiendo region del analisis', 'error');
@@ -645,7 +791,6 @@ mostrarInfoRegion(data) {
         return `Region ${regionId}`;
     }
 
-// En la clase MapaInteractivo - REEMPLAZAR la función compararRegiones
 async compararRegiones() {
     try {
         if (this.regionesAnalisis.size === 0) {
@@ -654,24 +799,24 @@ async compararRegiones() {
         }
 
         this.mostrarCargando('info-region', 'Comparando regiones...');
-        
+
         // Construir URL con las regiones seleccionadas
         const regionesIds = Array.from(this.regionesAnalisis).join(',');
         const url = `/api/comparar-regiones/?regiones=${regionesIds}`;
-        
+
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.error) {
             throw new Error(data.error);
         }
-        
+
         this.mostrarComparacionRegiones(data);
-        
+
     } catch (error) {
         console.error('Error comparando regiones:', error);
         this.mostrarError('info-region', 'Error al comparar regiones');
@@ -681,7 +826,7 @@ async compararRegiones() {
 // AGREGAR esta nueva función para mostrar la comparación
 mostrarComparacionRegiones(data) {
     const contenedor = document.getElementById('info-region');
-    
+
     if (!data.regiones_comparadas || data.regiones_comparadas.length === 0) {
         contenedor.innerHTML = `
             <div class="error">
@@ -713,9 +858,9 @@ mostrarComparacionRegiones(data) {
 
     data.regiones_comparadas.forEach(region => {
         const estadisticas = region.estadisticas;
-        const precioPromedio = estadisticas.precio_promedio ? 
+        const precioPromedio = estadisticas.precio_promedio ?
             parseFloat(estadisticas.precio_promedio).toFixed(2) : 'N/A';
-        const volumenTotal = estadisticas.volumen_total ? 
+        const volumenTotal = estadisticas.volumen_total ?
             parseFloat(estadisticas.volumen_total).toLocaleString('es-CL') : '0';
 
         comparacionHTML += `
@@ -751,21 +896,21 @@ generarMetricasComparacion(regiones) {
 
     const precios = regiones.map(r => parseFloat(r.estadisticas.precio_promedio) || 0).filter(p => p > 0);
     const volumenes = regiones.map(r => parseFloat(r.estadisticas.volumen_total) || 0);
-    
-    const regionMayorPrecio = precios.length > 0 ? 
+
+    const regionMayorPrecio = precios.length > 0 ?
         regiones[precios.indexOf(Math.max(...precios))] : null;
-    const regionMenorPrecio = precios.length > 0 ? 
+    const regionMenorPrecio = precios.length > 0 ?
         regiones[precios.indexOf(Math.min(...precios))] : null;
-    const regionMayorVolumen = volumenes.length > 0 ? 
+    const regionMayorVolumen = volumenes.length > 0 ?
         regiones[volumenes.indexOf(Math.max(...volumenes))] : null;
 
     let metricasHTML = '';
 
     if (regionMayorPrecio && regionMenorPrecio) {
-        const diferenciaPrecio = ((parseFloat(regionMayorPrecio.estadisticas.precio_promedio) - 
-                                 parseFloat(regionMenorPrecio.estadisticas.precio_promedio)) / 
+        const diferenciaPrecio = ((parseFloat(regionMayorPrecio.estadisticas.precio_promedio) -
+                                 parseFloat(regionMenorPrecio.estadisticas.precio_promedio)) /
                                  parseFloat(regionMenorPrecio.estadisticas.precio_promedio) * 100).toFixed(1);
-        
+
         metricasHTML += `
             <div class="metrica-item">
                 <span class="metrica-label">Mayor precio promedio:</span>
@@ -793,12 +938,20 @@ generarMetricasComparacion(regiones) {
 
     return metricasHTML || '<p>No hay datos suficientes para generar metricas</p>';
 }
+
     limpiarAnalisis() {
         try {
             this.regionesAnalisis.clear();
             this.actualizarListaAnalisis();
+
+            // Si se limpia el análisis, también quitar región de filtros
+            if (!this.regionSeleccionada) {
+                this.filtros.region_id = '';
+                this.actualizarDashboardConFiltros();
+            }
+
             this.mostrarMensaje('Analisis limpiado', 'info');
-            
+
         } catch (error) {
             console.error('Error limpiando analisis:', error);
             this.mostrarMensaje('Error limpiando analisis', 'error');
@@ -808,34 +961,34 @@ generarMetricasComparacion(regiones) {
 async cargarProductosRegion(regionId) {
     try {
         const contenedor = document.getElementById('lista-productos');
-        
+
         // Si el contenedor no existe, no hacer nada
         if (!contenedor) {
             return;
         }
-        
+
         this.mostrarCargando('lista-productos', 'Cargando productos...');
-        
+
         const params = new URLSearchParams();
         if (this.filtros.subsector) params.append('subsector', this.filtros.subsector);
         if (this.filtros.producto) params.append('producto', this.filtros.producto);
         if (this.filtros.año) params.append('año', this.filtros.año);
-        
+
         const url = `/api/region/${regionId}/productos/?${params.toString()}`;
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.error) {
             throw new Error(data.error);
         }
-        
+
         this.mostrarProductosRegion(data);
-        
+
     } catch (error) {
         console.error('Error cargando productos:', error);
         this.mostrarError('lista-productos', 'Error cargando productos');
@@ -844,29 +997,49 @@ async cargarProductosRegion(regionId) {
 
 mostrarProductosRegion(data) {
     const contenedor = document.getElementById('lista-productos');
-    
-    // VERIFICAR que el elemento existe antes de manipularlo
+
     if (!contenedor) {
-        console.error('Elemento #lista-productos no encontrado en el DOM');
+        console.error('Elemento #lista-productos no encontrado');
         return;
     }
-    
+
+    //  MOSTRAR INDICADOR DE FILTROS ACTIVOS
+    let infoFiltros = '';
+    if (data.filtros_aplicados && (
+        data.filtros_aplicados.producto ||
+        data.filtros_aplicados.subsector ||
+        data.filtros_aplicados.año
+    )) {
+        const filtrosActivos = [];
+        if (data.filtros_aplicados.subsector) filtrosActivos.push(`Subsector: ${data.filtros_aplicados.subsector}`);
+        if (data.filtros_aplicados.producto) filtrosActivos.push(`Producto: ${data.filtros_aplicados.producto}`);
+        if (data.filtros_aplicados.año) filtrosActivos.push(`Año: ${data.filtros_aplicados.año}`);
+
+        infoFiltros = `
+            <div class="filtros-activos-panel" style="background: #e3f2fd; padding: 8px; border-radius: 4px; margin-bottom: 10px; border-left: 4px solid #2196f3;">
+                <strong>Filtros aplicados:</strong> ${filtrosActivos.join(' • ')}
+            </div>
+        `;
+    }
+
     if (!data.productos || data.productos.length === 0) {
-        contenedor.innerHTML = `
+        contenedor.innerHTML = infoFiltros + `
             <div class="sin-resultados">
                 <p>No se encontraron productos</p>
-                <p class="texto-pequeno">Prueba ajustando los filtros</p>
+                <p class="texto-pequeno">${this.filtros.subsector || this.filtros.producto || this.filtros.año ?
+                    'Prueba ajustando los filtros' :
+                    'No hay datos disponibles para esta región'}</p>
             </div>
         `;
         return;
     }
 
     const productosHTML = data.productos.map(producto => {
-        const precioPromedio = producto.precio_promedio ? 
+        const precioPromedio = producto.precio_promedio ?
             parseFloat(producto.precio_promedio) : 0;
-        const volumenTotal = producto.volumen_total ? 
+        const volumenTotal = producto.volumen_total ?
             parseFloat(producto.volumen_total) : 0;
-        
+
         return `
             <div class="producto-item">
                 <div class="producto-header">
@@ -891,18 +1064,14 @@ mostrarProductosRegion(data) {
         `;
     }).join('');
 
-    contenedor.innerHTML = `
+    contenedor.innerHTML = infoFiltros + `
         <div class="resultados-info">
-            <p class="texto-pequeno">Mostrando ${data.total_resultados} productos</p>
-            ${data.filtros_aplicados && (data.filtros_aplicados.producto || data.filtros_aplicados.subsector || data.filtros_aplicados.año) ? 
-                `<p class="texto-pequeno filtros-aplicados">Con filtros aplicados</p>` : ''
-            }
+            <p class="texto-pequeno">Mostrando ${data.total_resultados || data.productos.length} productos</p>
         </div>
         ${productosHTML}
     `;
 }
 }
-
 // Inicializar la aplicación cuando se carga la página
 document.addEventListener('DOMContentLoaded', function() {
     try {

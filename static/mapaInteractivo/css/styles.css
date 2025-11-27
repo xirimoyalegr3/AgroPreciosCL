@@ -368,8 +368,8 @@ body {
 }
 
 .producto-subsector {
-    font-size: 0.75em;
-    color: #6c757d;
+    font-size: 12px;
+    color: #43494f;
     background: #e9ecef;
     padding: 4px 8px;
     border-radius: 12px;
@@ -391,14 +391,14 @@ body {
 
 .producto-stat span {
     display: block;
-    color: #6c757d;
-    font-size: 0.75em;
+    color: #2f3234;
+    font-size: 14px;
     margin-bottom: 2px;
 }
 
 .producto-stat strong {
     color: #2e7d32;
-    font-size: 0.9em;
+    font-size: 16px;
 }
 
 /* Estados */
@@ -1225,14 +1225,10 @@ body {
 }
 
 .btn-dashboard-flotante:hover {
-    background: #218838;
     transform: scale(1.1);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
-.btn-dashboard-flotante:active {
-    transform: scale(0.95);
-}
 
 /* Tooltip para el botón flotante */
 .btn-dashboard-flotante::after {
@@ -1780,7 +1776,7 @@ body {
     font-size: 0.8em !important;
 }
 #panel-lateral {
-    width: 550px !important;
+    width: 700px !important;
     min-width: 550px !important;
 }
 
@@ -1798,7 +1794,6 @@ body {
     right: 30px;
     width: 70px;
     height: 70px;
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
     color: white;
     border: none;
     border-radius: 50%;
@@ -1817,13 +1812,47 @@ body {
     background-size: 32px 32px;
 }
 
-.btn-dashboard-flotante:hover {
-    background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
-    transform: scale(1.1);
-    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6);
+
+
+/* Estilos para controles de integración */
+.btn-integracion {
+    background: #2e7d32;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-.btn-dashboard-flotante:active {
-    transform: scale(0.95);
+.btn-integracion:hover {
+    background: #1b5e20;
+    transform: translateY(-1px);
 }
 
+.btn-integracion:active {
+    transform: translateY(0);
+}
+
+.filtro-indicador {
+    font-size: 0.8em;
+    color: #28a745;
+    font-weight: normal;
+    font-style: italic;
+}
+.filtros-activos-panel {
+    background: #e3f2fd !important;
+    padding: 8px !important;
+    border-radius: 4px !important;
+    margin-bottom: 10px !important;
+    border-left: 4px solid #2196f3 !important;
+    font-size: 0.9em;
+}
+
+.filtros-activos-panel strong {
+    color: #1976d2;
+}

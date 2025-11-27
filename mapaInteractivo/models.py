@@ -1,36 +1,36 @@
-# mapaInteractivo/models.py 
+# mapaInteractivo/models.py
 from django.db import models
 
 class Region(models.Model):
     id_region = models.IntegerField(unique=True)
     nombre = models.CharField(max_length=100)
-    
+
     def __str__(self):
         return self.nombre
 
 class Mercado(models.Model):
     nombre = models.CharField(max_length=200)
-    
+
     def __str__(self):
         return self.nombre
 
 class Subsector(models.Model):
     nombre = models.CharField(max_length=100)
-    
+
     def __str__(self):
         return self.nombre
 
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
     subsector = models.ForeignKey(Subsector, on_delete=models.CASCADE)
-    
+
     def __str__(self):
         return self.nombre
 
 class Variedad(models.Model):
     nombre = models.CharField(max_length=100)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    
+
     def __str__(self):
         return self.nombre
 
@@ -48,7 +48,7 @@ class DatosComercializacion(models.Model):
     precio_minimo = models.DecimalField(max_digits=15, decimal_places=2)
     precio_maximo = models.DecimalField(max_digits=15, decimal_places=2)
     precio_promedio = models.DecimalField(max_digits=15, decimal_places=2)
-    
+
     class Meta:
         indexes = [
             models.Index(fields=['fecha']),
@@ -63,16 +63,16 @@ class ProgresoCarga(models.Model):
     completado = models.BooleanField(default=False)
     fecha_inicio = models.DateTimeField(auto_now_add=True)
     fecha_fin = models.DateTimeField(null=True, blank=True)
-    
+
     def __str__(self):
         return f"{self.archivo} - {self.lineas_procesadas}/{self.total_lineas}"
-    
+
     def get_porcentaje(self):
         """Calcula el porcentaje de completado"""
         if self.total_lineas == 0:
             return 0
         return (self.lineas_procesadas / self.total_lineas) * 100
 
-        
+
     def __str__(self):
         return f"{self.archivo} - {self.lineas_procesadas}/{self.total_lineas}"
