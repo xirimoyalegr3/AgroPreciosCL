@@ -10,7 +10,7 @@ AgroPreciosChile es una aplicación web interactiva que visualiza datos de comer
 
 ## Características Implementadas
 
-### [v1.0.0] - 2025-10-28
+### [v1.0.0] - 2025-11-27
 **Funcionalidades Principales**
 
 - **Mapa Interactivo**: Visualización geográfica de las regiones de Chile con marcadores personalizados
@@ -19,10 +19,13 @@ AgroPreciosChile es una aplicación web interactiva que visualiza datos de comer
   - Filtrado por subsector (Frutas, Hortalizas, etc.)
   - Filtrado por producto específico
   - Filtrado por año de comercialización
-- **Estadísticas en Tiempo Real**: 
+- **Estadísticas**: 
   - Resumen general de la base de datos
   - Métricas por región seleccionada
   - Precios promedios, volúmenes y tendencias
+    
+- **Pedicciones con IA**
+-  Predicciones por roducto y unidad en un horizonte de tiempo: 
 
 **Características Técnicas**
 - **Backend**: Django 4.2 con API RESTful
@@ -39,31 +42,7 @@ AgroPreciosChile es una aplicación web interactiva que visualiza datos de comer
 - Modelos de base de datos diseñados y migrados
 - Script para carga masiva de archivos CSV a la BD
 
-## Estructura del Proyecto
 
-```
-AgroPreciosChile/
-├── mapaInteractivo/          # App principal
-│   ├── models.py            # Modelos de datos
-│   ├── views.py             # Vistas y APIs
-│   ├── urls.py              # Rutas de la aplicación
-│   └── admin.py             # Panel de administración
-├── templates/               # Plantillas HTML
-├── static/                  # Archivos estáticos
-│   ├── css/styles.css       # Estilos personalizados
-│   └── js/mapa.js          # Lógica del mapa interactivo
-└── AgroPreciosChile/        # Configuración del proyecto
-    └── settings.py          # Configuraciones principales
-```
-
-##  Modelos de Datos
-
-- **Region**: Divisiones territoriales de Chile
-- **Mercado**: Locales de comercialización
-- **Subsector**: Categorías (Frutas, Hortalizas, etc.)
-- **Producto**: Productos específicos
-- **Variedad**: Variedades de productos
-- **DatosComercializacion**: Datos históricos de precios y volúmenes
 
 ##  Funcionalidades de Análisis
 
@@ -102,13 +81,6 @@ AgroPreciosChile/
    python manage.py cargar_csv archivo.csv
    ```
 
-##  APIs Disponibles
-
-- `GET /api/resumen/` - Estadísticas generales
-- `GET /api/region/<id>/` - Datos específicos de región
-- `GET /api/region/<id>/productos/` - Productos por región
-- `GET /api/filtros/` - Opciones de filtros disponibles
-- `GET /api/comparar-regiones/` - Comparación multi-región
 
 ##  Interfaz de Usuario
 
@@ -117,11 +89,10 @@ AgroPreciosChile/
 - **Panel de Región**: Detalles y productos por región
 - **Análisis Multi-Región**: Comparación side-by-side
 
-## Próximas Características
+## Otras Características
 
-- [ ] Gráficos de tendencias temporales
-- [ ] Exportación de reportes en PDF/Excel
-- [En progreso] Predicción de precios.
+Gráficos de tendencias temporales
+Exportación de reportes en PDF/Excel
 
 
 ---
