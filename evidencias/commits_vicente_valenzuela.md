@@ -1,0 +1,6 @@
+- **2a5283dc** - documentacion y evidencias (2025-11-18)
+- **9624b7e1** - Prediccion v1 (2025-11-13)
+- **d3bb9af6** - Vista Prediccion (2025-11-12)
+- **56b54bfb** - Movidas de archivos (2025-11-11)
+- **a9ee8a38** - Mejores modelos y scripts y ap (2025-11-11)
+- **1e354f6e** - Modelo predictivo inicio (2025-10-10)

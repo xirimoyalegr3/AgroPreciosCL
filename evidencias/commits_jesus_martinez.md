@@ -1,0 +1,1 @@
+- **5d778cdc** - cambios de html, implementacion de css, arreglar error de prediccion (2025-10-25)
