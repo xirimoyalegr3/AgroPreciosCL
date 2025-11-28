@@ -10,10 +10,10 @@ def normalize(s):
 def normalizar_nombres_modelos():
     model_dir = os.path.join(settings.BASE_DIR, "modelos")
 
-    print("📁 Carpeta modelos:", model_dir)
+    print("Carpeta modelos:", model_dir)
 
     archivos = os.listdir(model_dir)
-    print("🔍 Archivos encontrados:", archivos)
+    print("Archivos encontrados:", archivos)
 
     for archivo in archivos:
         ruta_actual = os.path.join(model_dir, archivo)
@@ -26,10 +26,10 @@ def normalizar_nombres_modelos():
         nueva_ruta = os.path.join(model_dir, nuevo_nombre)
 
         if archivo == nuevo_nombre:
-            print(f"✔ Sin cambios: {archivo}")
+            print(f"Sin cambios: {archivo}")
             continue
 
-        print(f"🔄 Renombrando: {archivo}  →  {nuevo_nombre}")
+        print(f"Renombrando: {archivo}  →  {nuevo_nombre}")
         os.rename(ruta_actual, nueva_ruta)
 
-    print("✅ Normalización completa.")
+    print("Normalización completa.")

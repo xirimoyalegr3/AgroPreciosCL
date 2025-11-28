@@ -57,7 +57,7 @@ def cargar_modelo(producto: str, categoria: str, region: str):
         for archivo in archivos:
             if archivo.lower() == candidato.lower():
                 ruta = os.path.join(MODEL_DIR, archivo)
-                print("✅ Coincidencia exacta encontrada:", archivo)
+                print("Coincidencia exacta encontrada:", archivo)
                 try:
                     return joblib.load(ruta)
                 except Exception as e:
@@ -66,12 +66,12 @@ def cargar_modelo(producto: str, categoria: str, region: str):
     # buscar coincidencias parciales producto+region
     parcial = [f for f in archivos if p.lower() in f.lower() and r.lower() in f.lower()]
     if parcial:
-        print("ℹ️ Coincidencias parciales:", parcial)
+        print("Coincidencias parciales:", parcial)
         for archivo in parcial:
             ruta = os.path.join(MODEL_DIR, archivo)
             try:
                 return joblib.load(ruta)
             except Exception as e:
-                print(f"⚠️ Falló carga parcial {ruta}: {e}")
+                print(f"Falló carga parcial {ruta}: {e}")
 
     raise FileNotFoundError(f"No se encontró modelo para {producto}/{categoria}/{region}. Buscados: {posibles}")
