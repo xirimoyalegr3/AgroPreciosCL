@@ -1687,6 +1687,8 @@ def limpiar_cache_vistas(request):
             'solution': 'Reinicia el servidor Django (Ctrl+C y python manage.py runserver)'
         }, status=500)
 
+
+@cache_page(60 * 240)  # 10 minutos  
 def exportar_dashboard_pdf(request):
     """Exportar datos del dashboard a PDF - OPTIMIZADO CON FILTROS"""
     try:
@@ -1811,7 +1813,8 @@ def exportar_dashboard_pdf(request):
     except Exception as e:
         logger.error(f"Error generando PDF: {str(e)}")
         return HttpResponse(f"Error al generar el PDF: {str(e)}", status=500)
-
+        
+@cache_page(60 * 240)  # 10 minutos  
 def exportar_dashboard_excel(request):
     """Exportar datos del dashboard a Excel - OPTIMIZADO CON FILTROS"""
     try:
